@@ -30,6 +30,7 @@ import {
   type ReactNode,
   type WheelEvent,
   useEffect,
+  useLayoutEffect,
   useOptimistic,
   useRef,
   useState,
@@ -222,6 +223,66 @@ export function HomeScreen({
     }
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [settingsOpen]);
+
+  useLayoutEffect(() => {
+    if (!settingsOpen) {
+      return;
+    }
+    const popover = settingsPopoverRef.current;
+    const opener = settingsButtonRef.current;
+    if (!popover) {
+      return;
+    }
+    const root: HTMLDivElement = popover;
+
+    function getFocusable(): HTMLElement[] {
+      const selector =
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      return Array.from(root.querySelectorAll<HTMLElement>(selector)).filter(
+        (el) =>
+          !el.hasAttribute("disabled") &&
+          !el.closest('[aria-hidden="true"]'),
+      );
+    }
+
+    let rafId = 0;
+    rafId = window.requestAnimationFrame(() => {
+      const focusable = getFocusable();
+      (focusable[0] ?? root).focus();
+    });
+
+    function onKeyDown(e: globalThis.KeyboardEvent) {
+      if (e.key !== "Tab") {
+        return;
+      }
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!active || !root.contains(active)) {
+        e.preventDefault();
+        first.focus();
+        return;
+      }
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      document.removeEventListener("keydown", onKeyDown, true);
+      opener?.focus({ preventScroll: true });
+    };
   }, [settingsOpen]);
 
   useEffect(() => {
@@ -782,6 +843,7 @@ export function HomeScreen({
       {settingsOpen ? (
         <div
           aria-label="Settings"
+          aria-modal="true"
           className="fixed z-50 w-[280px] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-2xl"
           ref={settingsPopoverRef}
           role="dialog"
@@ -994,6 +1056,10 @@ const RELATIVE_TIME_THRESHOLDS: Array<{
   { unit: "minute", seconds: 60 },
 ];
 
+const RELATIVE_TIME_FORMATTER = new Intl.RelativeTimeFormat(undefined, {
+  numeric: "auto",
+});
+
 function formatRelativeTime(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
@@ -1004,14 +1070,13 @@ function formatRelativeTime(iso: string) {
   if (abs < 45) {
     return "just now";
   }
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
   for (const { unit, seconds } of RELATIVE_TIME_THRESHOLDS) {
     if (abs >= seconds) {
       const value = Math.round(diffSeconds / seconds);
-      return rtf.format(value, unit);
+      return RELATIVE_TIME_FORMATTER.format(value, unit);
     }
   }
-  return rtf.format(diffSeconds, "second");
+  return RELATIVE_TIME_FORMATTER.format(diffSeconds, "second");
 }
 
 function formatCreatedDate(iso: string) {

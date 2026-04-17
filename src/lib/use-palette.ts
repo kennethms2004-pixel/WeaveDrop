@@ -22,9 +22,28 @@ function readPalette(): Palette {
 }
 
 function subscribe(callback: () => void) {
-  window.addEventListener(PALETTE_EVENT, callback);
+  function onPaletteEvent() {
+    callback();
+  }
+  function onStorage(event: StorageEvent) {
+    if (event.key !== PALETTE_STORAGE_KEY) {
+      return;
+    }
+    const next = event.newValue;
+    if (next === "loom" || next === "thread") {
+      document.documentElement.dataset.palette = next;
+    } else if (next === null) {
+      document.documentElement.dataset.palette = DEFAULT_PALETTE;
+    } else {
+      return;
+    }
+    callback();
+  }
+  window.addEventListener(PALETTE_EVENT, onPaletteEvent);
+  window.addEventListener("storage", onStorage);
   return () => {
-    window.removeEventListener(PALETTE_EVENT, callback);
+    window.removeEventListener(PALETTE_EVENT, onPaletteEvent);
+    window.removeEventListener("storage", onStorage);
   };
 }
 
