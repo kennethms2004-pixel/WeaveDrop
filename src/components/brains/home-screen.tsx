@@ -136,20 +136,32 @@ export function HomeScreen({
   const searchRef = useRef<HTMLInputElement>(null);
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
+  // Clerk can briefly flip `isSignedIn` (e.g. false -> true) during session
+  // hydration right after load. Treating that as a real auth change and doing
+  // a full `location.reload()` also resets this ref on every reload, which
+  // loops forever. Defer the first snapshot until the value settles, then
+  // refresh RSC data softly for genuine sign-in / sign-out transitions.
   useEffect(() => {
     if (!isAuthLoaded) {
       return;
     }
+
     const current = Boolean(isSignedIn);
-    const previous = lastAuthStateRef.current;
-    if (previous === current) {
+
+    if (lastAuthStateRef.current === null) {
+      const id = window.setTimeout(() => {
+        lastAuthStateRef.current = Boolean(isSignedIn);
+      }, 150);
+      return () => window.clearTimeout(id);
+    }
+
+    if (lastAuthStateRef.current === current) {
       return;
     }
+
     lastAuthStateRef.current = current;
-    if (previous !== null) {
-      window.location.reload();
-    }
-  }, [isAuthLoaded, isSignedIn]);
+    router.refresh();
+  }, [isAuthLoaded, isSignedIn, router]);
 
   useEffect(() => {
     const id = window.requestAnimationFrame(() => {
