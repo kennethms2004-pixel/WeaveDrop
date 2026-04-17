@@ -913,7 +913,7 @@ export function HomeScreen({
                   </p>
                 ) : null}
               </div>
-              <SignOutButton>
+              <SignOutButton redirectUrl="/welcome">
                 <SettingsMenuRow
                   icon={<LogOut className="h-4 w-4" />}
                   label="Sign out"
