@@ -166,7 +166,8 @@ body {
     transition:
       transform var(--dur-quick) var(--ease),
       box-shadow var(--dur-quick) var(--ease),
-      background var(--dur-quick) var(--ease);
+      background var(--dur-quick) var(--ease),
+      outline-color var(--dur-quick) var(--ease);
   }
 
   .btn-primary:hover {
@@ -179,6 +180,13 @@ body {
     transform: translateY(0);
   }
 
+  .btn-primary:focus-visible {
+    background: var(--brand-deep);
+    box-shadow: var(--shadow-2);
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
   .btn-secondary {
     background: transparent;
     color: var(--fg);
@@ -187,12 +195,20 @@ body {
     font-weight: 500;
     transition:
       background var(--dur-quick) var(--ease),
-      border-color var(--dur-quick) var(--ease);
+      border-color var(--dur-quick) var(--ease),
+      outline-color var(--dur-quick) var(--ease);
   }
 
   .btn-secondary:hover {
     background: color-mix(in oklch, var(--ink) 4%, transparent);
     border-color: color-mix(in oklch, var(--ink) 30%, transparent);
+  }
+
+  .btn-secondary:focus-visible {
+    background: color-mix(in oklch, var(--ink) 4%, transparent);
+    border-color: color-mix(in oklch, var(--ink) 30%, transparent);
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
   .btn-ghost {
@@ -202,11 +218,19 @@ body {
     font-weight: 500;
     transition:
       background var(--dur-quick) var(--ease),
-      color var(--dur-quick) var(--ease);
+      color var(--dur-quick) var(--ease),
+      outline-color var(--dur-quick) var(--ease);
   }
 
   .btn-ghost:hover {
     color: var(--fg);
     background: color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+
+  .btn-ghost:focus-visible {
+    color: var(--fg);
+    background: color-mix(in oklch, var(--ink) 5%, transparent);
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }

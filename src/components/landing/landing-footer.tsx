@@ -28,17 +28,17 @@ export function LandingFooter() {
         <FooterColumn
           label="Company"
           links={[
-            { href: "#", label: "About" },
-            { href: "#", label: "Craft notes" },
-            { href: "#", label: "Contact" },
+            { label: "About" },
+            { label: "Craft notes" },
+            { label: "Contact" },
           ]}
         />
         <FooterColumn
           label="Legal"
           links={[
-            { href: "#", label: "Privacy" },
-            { href: "#", label: "Terms" },
-            { href: "#", label: "Security" },
+            { label: "Privacy" },
+            { label: "Terms" },
+            { label: "Security" },
           ]}
         />
       </div>
@@ -55,7 +55,7 @@ export function LandingFooter() {
 
 type FooterColumnProps = {
   label: string;
-  links: { href: string; label: string }[];
+  links: { href?: string; label: string }[];
 };
 
 function FooterColumn({ label, links }: FooterColumnProps) {
@@ -65,9 +65,13 @@ function FooterColumn({ label, links }: FooterColumnProps) {
       <ul className="mt-4 space-y-2 text-[13px] text-fg-muted">
         {links.map((l) => (
           <li key={l.label}>
-            <a href={l.href} className="hover:text-foreground">
-              {l.label}
-            </a>
+            {l.href ? (
+              <a href={l.href} className="hover:text-foreground">
+                {l.label}
+              </a>
+            ) : (
+              <span>{l.label}</span>
+            )}
           </li>
         ))}
       </ul>
