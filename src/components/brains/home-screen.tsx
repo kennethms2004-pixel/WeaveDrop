@@ -17,7 +17,14 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import {
   Show,
   SignInButton,
@@ -29,13 +36,20 @@ import {
 
 import { SlimCanvasScreen } from "@/components/canvas/slim-canvas-screen";
 import { BRAND_ICON_SRC } from "@/lib/brand";
-import { useWeaveDropStore, type BrainListItem } from "@/lib/weavedrop-store";
+import {
+  createBrain as createBrainAction,
+  deleteBrain as deleteBrainAction,
+} from "@/lib/actions/brain.actions";
+import type { BrainDTO, EdgeDTO, NodeDTO } from "@/lib/actions/dto";
 
 type Tab = "overview" | "personal";
 
 type HomeScreenProps = {
+  initialBrains: BrainDTO[];
   initialTab?: Tab;
-  selectedBrainId?: string | null;
+  selectedBrain?: BrainDTO;
+  selectedBrainNodes?: NodeDTO[];
+  selectedBrainEdges?: EdgeDTO[];
 };
 
 const SIDEBAR_STORAGE_KEY = "weavedrop.sidebar";
@@ -58,18 +72,41 @@ function clampWidth(value: number) {
   return value;
 }
 
+type OptimisticBrainAction =
+  | { type: "add"; brain: BrainDTO }
+  | { type: "remove"; id: string };
+
 export function HomeScreen({
+  initialBrains,
   initialTab = "overview",
-  selectedBrainId = null,
+  selectedBrain,
+  selectedBrainNodes = [],
+  selectedBrainEdges = [],
 }: HomeScreenProps) {
   const router = useRouter();
-  const brains = useWeaveDropStore((s) => s.brains);
-  const getGraph = useWeaveDropStore((s) => s.getGraph);
+
+  // `initialBrains` is the authoritative server value; optimistic overlay is
+  // applied during pending transitions and auto-resets when the server state
+  // catches up (via revalidatePath + router.refresh()).
+  const [brains, applyBrainAction] = useOptimistic<
+    BrainDTO[],
+    OptimisticBrainAction
+  >(initialBrains, (current, action) => {
+    switch (action.type) {
+      case "add":
+        return [action.brain, ...current];
+      case "remove":
+        return current.filter((brain) => brain.id !== action.id);
+      default:
+        return current;
+    }
+  });
+  const selectedBrainId = selectedBrain?.id ?? null;
 
   const [tab, setTab] = useState<Tab>(() => initialTab);
   const [quickName, setQuickName] = useState("");
   const [search, setSearch] = useState("");
-  const [creating, setCreating] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [brainError, setBrainError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
@@ -89,22 +126,14 @@ export function HomeScreen({
     }
     const current = Boolean(isSignedIn);
     const previous = lastAuthStateRef.current;
+    if (previous === current) {
+      return;
+    }
     lastAuthStateRef.current = current;
-    setSettingsOpen(false);
-    if (previous !== null && previous !== current) {
+    if (previous !== null) {
       window.location.reload();
     }
   }, [isAuthLoaded, isSignedIn]);
-
-  useEffect(() => {
-    if (!selectedBrainId) {
-      return;
-    }
-
-    if (!brains.some((brain) => brain.id === selectedBrainId)) {
-      router.replace("/");
-    }
-  }, [brains, router, selectedBrainId]);
 
   useEffect(() => {
     const id = window.requestAnimationFrame(() => {
@@ -144,7 +173,11 @@ export function HomeScreen({
 
   useEffect(() => {
     function onKey(e: globalThis.KeyboardEvent) {
-      if (e.key === "[" && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+      if (
+        e.key === "[" &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
         setCollapsed((v) => !v);
       }
       if (e.key === "Escape") {
@@ -195,39 +228,50 @@ export function HomeScreen({
     return `Brain ${new Date().toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`;
   }
 
-  function createBrain(options?: { allowEmptyQuickName?: boolean }) {
+  function handleCreateBrain(options?: { allowEmptyQuickName?: boolean }) {
     const typed = quickName.trim();
     const name = typed || (options?.allowEmptyQuickName ? defaultBrainName() : "");
-    if (!name || creating) {
+    if (!name || isPending) {
       return;
     }
 
     setBrainError(null);
-    setCreating(true);
+    setQuickName("");
 
-    try {
-      const brain = useWeaveDropStore.getState().createBrain(name);
-      setQuickName("");
-      setCreating(false);
-      router.push(`/brains/${brain.id}`);
-    } catch {
-      setBrainError("Could not create brain.");
-      setCreating(false);
-    }
+    startTransition(async () => {
+      try {
+        const created = await createBrainAction(name);
+        applyBrainAction({ type: "add", brain: created });
+        router.push(`/brains/${created.id}`);
+        router.refresh();
+      } catch (error) {
+        console.error("[home] createBrain failed", error);
+        setBrainError("Could not create brain.");
+      }
+    });
   }
 
-  function deleteBrain(id: string) {
-    useWeaveDropStore.getState().deleteBrain(id);
-
-    if (selectedBrainId === id) {
-      router.replace("/");
-    }
+  function handleDeleteBrain(id: string) {
+    startTransition(async () => {
+      applyBrainAction({ type: "remove", id });
+      try {
+        await deleteBrainAction(id);
+        if (selectedBrainId === id) {
+          router.replace("/");
+        } else {
+          router.refresh();
+        }
+      } catch (error) {
+        console.error("[home] deleteBrain failed", error);
+        router.refresh();
+      }
+    });
   }
 
   function onKey(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
-      createBrain();
+      handleCreateBrain();
     }
     if (e.key === "Escape") {
       setQuickName("");
@@ -235,16 +279,8 @@ export function HomeScreen({
     }
   }
 
-  const selectedBrainName = selectedBrainId
-    ? brains.find((b) => b.id === selectedBrainId)?.name ?? null
-    : null;
-
-  const selectedGraph = selectedBrainId ? getGraph(selectedBrainId) : null;
-  const isCanvasView = Boolean(
-    selectedBrainId &&
-      brains.some((b) => b.id === selectedBrainId) &&
-      selectedGraph,
-  );
+  const selectedBrainName = selectedBrain?.name ?? null;
+  const isCanvasView = Boolean(selectedBrain);
   const isExtended = !collapsed && width >= SIDEBAR_EXTENDED_THRESHOLD;
 
   const filtered =
@@ -485,13 +521,19 @@ export function HomeScreen({
           </header>
         ) : null}
 
-        <div className={`flex min-h-0 flex-1 flex-col ${isCanvasView ? "overflow-hidden" : "overflow-y-auto px-8 py-8"}`}>
-          {isCanvasView && selectedBrainId && selectedGraph ? (
+        <div
+          className={`flex min-h-0 flex-1 flex-col ${
+            isCanvasView ? "overflow-hidden" : "overflow-y-auto px-8 py-8"
+          }`}
+        >
+          {isCanvasView && selectedBrain ? (
             <div className="min-h-0 flex-1 bg-[#1D1F24]">
               <SlimCanvasScreen
-                key={selectedBrainId}
-                brainId={selectedBrainId}
-                brainName={selectedBrainName ?? "Brain"}
+                key={selectedBrain.id}
+                brainId={selectedBrain.id}
+                brainName={selectedBrain.name}
+                initialNodes={selectedBrainNodes}
+                initialEdges={selectedBrainEdges}
               />
             </div>
           ) : (
@@ -521,7 +563,7 @@ export function HomeScreen({
                     ref={inputRef}
                     aria-label="New brain name"
                     className="h-10 w-full rounded-lg border border-white/10 bg-[#25282E] px-3 pr-8 text-[13px] text-white outline-none ring-[#d97757]/40 placeholder:text-zinc-500 focus:border-[#d97757]/50 focus:ring-2"
-                    disabled={creating}
+                    disabled={isPending}
                     onChange={(e) => setQuickName(e.target.value)}
                     onKeyDown={onKey}
                     placeholder="Name a new brain and press Enter…"
@@ -541,11 +583,11 @@ export function HomeScreen({
                 {quickName.trim() ? (
                   <button
                     className="h-10 rounded-lg bg-[#d97757] px-4 text-[12px] font-medium text-white hover:bg-[#c8674a] disabled:opacity-50"
-                    disabled={creating}
-                    onClick={() => createBrain()}
+                    disabled={isPending}
+                    onClick={() => handleCreateBrain()}
                     type="button"
                   >
-                    {creating ? "Creating…" : "Create →"}
+                    {isPending ? "Creating…" : "Create →"}
                   </button>
                 ) : null}
               </div>
@@ -588,7 +630,7 @@ export function HomeScreen({
                       <BrainRow
                         key={brain.id}
                         brain={brain}
-                        onDelete={() => deleteBrain(brain.id)}
+                        onDelete={() => handleDeleteBrain(brain.id)}
                         selected={brain.id === selectedBrainId}
                       />
                     ))}
@@ -600,7 +642,7 @@ export function HomeScreen({
                     <BrainRow
                       key={brain.id}
                       brain={brain}
-                      onDelete={() => deleteBrain(brain.id)}
+                      onDelete={() => handleDeleteBrain(brain.id)}
                       selected={brain.id === selectedBrainId}
                     />
                   ))}
@@ -754,7 +796,7 @@ function BrainRow({
   onDelete,
   selected = false,
 }: {
-  brain: BrainListItem;
+  brain: BrainDTO;
   onDelete: () => void;
   selected?: boolean;
 }) {
@@ -791,7 +833,7 @@ function BrainRow({
         </div>
       </Link>
       <span className="hidden shrink-0 rounded border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-500 sm:inline">
-        Local
+        Cloud
       </span>
       <div ref={ref} className="relative shrink-0">
         <button
