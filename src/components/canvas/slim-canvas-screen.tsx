@@ -2,41 +2,229 @@
 
 import "@xyflow/react/dist/style.css";
 
-import { useMemo } from "react";
-import type { Edge, Node } from "@xyflow/react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import type {
+  Connection,
+  Edge as RFEdge,
+  EdgeChange,
+  Node as RFNode,
+  NodeChange,
+} from "@xyflow/react";
 import {
   Background,
   Controls,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
+  applyEdgeChanges,
+  applyNodeChanges,
 } from "@xyflow/react";
+
+import { createEdge, deleteEdge } from "@/lib/actions/edge.actions";
+import { deleteNode, updateNode } from "@/lib/actions/node.actions";
+import type { EdgeDTO, NodeDTO } from "@/lib/actions/dto";
 
 type SlimCanvasScreenProps = {
   brainId: string;
   brainName: string;
+  initialNodes: NodeDTO[];
+  initialEdges: EdgeDTO[];
 };
 
-export function SlimCanvasScreen({ brainId, brainName }: SlimCanvasScreenProps) {
-  const nodes = useMemo<Node[]>(() => [], []);
-  const edges = useMemo<Edge[]>(() => [], []);
+const POSITION_DEBOUNCE_MS = 400;
+
+function nodeDtoToFlow(dto: NodeDTO): RFNode {
+  return {
+    id: dto.id,
+    type: "default",
+    position: dto.position,
+    data: {
+      label: resolveLabel(dto),
+      kind: dto.type,
+      status: dto.status,
+      ...dto.data,
+    },
+    ...(dto.size ? { width: dto.size.width, height: dto.size.height } : {}),
+  };
+}
+
+function edgeDtoToFlow(dto: EdgeDTO): RFEdge {
+  return {
+    id: dto.id,
+    source: dto.sourceNodeId,
+    target: dto.targetNodeId,
+    ...(dto.sourceHandle ? { sourceHandle: dto.sourceHandle } : {}),
+    ...(dto.targetHandle ? { targetHandle: dto.targetHandle } : {}),
+  };
+}
+
+function resolveLabel(dto: NodeDTO): string {
+  const title =
+    typeof dto.data?.title === "string" ? (dto.data.title as string) : null;
+  const text =
+    typeof dto.data?.text === "string" ? (dto.data.text as string) : null;
+
+  if (title) return title;
+  if (text) return text.length > 40 ? `${text.slice(0, 40)}…` : text;
+
+  switch (dto.type) {
+    case "source":
+      return "Source";
+    case "note":
+      return "Note";
+    case "chat":
+      return "Chat";
+    default:
+      return "Node";
+  }
+}
+
+export function SlimCanvasScreen({
+  brainId,
+  brainName,
+  initialNodes,
+  initialEdges,
+}: SlimCanvasScreenProps) {
+  // The parent page remounts this component with `key={brainId}` on route
+  // change, so these initializers run fresh per brain — no need to sync
+  // `initialNodes`/`initialEdges` back into state via effects.
+  const [nodes, setNodes] = useState<RFNode[]>(() =>
+    initialNodes.map(nodeDtoToFlow),
+  );
+  const [edges, setEdges] = useState<RFEdge[]>(() =>
+    initialEdges.map(edgeDtoToFlow),
+  );
+
+  const [, startTransition] = useTransition();
+  const positionTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+
+  const schedulePositionPersist = useCallback(
+    (nodeId: string, position: { x: number; y: number }) => {
+      const existing = positionTimers.current.get(nodeId);
+      if (existing) {
+        clearTimeout(existing);
+      }
+
+      const timer = setTimeout(() => {
+        positionTimers.current.delete(nodeId);
+        startTransition(() => {
+          updateNode({ nodeId, position }).catch((error) => {
+            console.error("[canvas] updateNode failed", error);
+          });
+        });
+      }, POSITION_DEBOUNCE_MS);
+
+      positionTimers.current.set(nodeId, timer);
+    },
+    [],
+  );
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      setNodes((current) => applyNodeChanges(changes, current));
+
+      for (const change of changes) {
+        if (change.type === "position" && change.position && !change.dragging) {
+          schedulePositionPersist(change.id, change.position);
+        }
+        if (change.type === "remove") {
+          startTransition(() => {
+            deleteNode(change.id).catch((error) => {
+              console.error("[canvas] deleteNode failed", error);
+            });
+          });
+        }
+      }
+    },
+    [schedulePositionPersist],
+  );
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    setEdges((current) => applyEdgeChanges(changes, current));
+
+    for (const change of changes) {
+      if (change.type === "remove") {
+        startTransition(() => {
+          deleteEdge(change.id).catch((error) => {
+            console.error("[canvas] deleteEdge failed", error);
+          });
+        });
+      }
+    }
+  }, []);
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) {
+        return;
+      }
+
+      startTransition(() => {
+        createEdge({
+          brainId,
+          sourceNodeId: connection.source as string,
+          targetNodeId: connection.target as string,
+          sourceHandle: connection.sourceHandle ?? undefined,
+          targetHandle: connection.targetHandle ?? undefined,
+        })
+          .then((created) => {
+            setEdges((current) => [
+              ...current.filter(
+                (e) =>
+                  !(e.source === created.sourceNodeId &&
+                    e.target === created.targetNodeId),
+              ),
+              edgeDtoToFlow(created),
+            ]);
+          })
+          .catch((error) => {
+            console.error("[canvas] createEdge failed", error);
+          });
+      });
+    },
+    [brainId],
+  );
+
+  useEffect(() => {
+    const timers = positionTimers.current;
+    return () => {
+      for (const timer of timers.values()) {
+        clearTimeout(timer);
+      }
+      timers.clear();
+    };
+  }, []);
+
+  const initialSnapshot = useMemo(
+    () => ({ brainId, brainName }),
+    [brainId, brainName],
+  );
 
   return (
     <div
       className="relative flex h-full min-h-0 w-full flex-col"
       role="application"
-      aria-label={`Canvas for ${brainName}`}
+      aria-label={`Canvas for ${initialSnapshot.brainName}`}
     >
       <ReactFlowProvider>
         <div className="min-h-0 flex-1">
           <ReactFlow
-            key={brainId}
+            key={initialSnapshot.brainId}
             nodes={nodes}
             edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
             fitView
-            nodesDraggable={false}
-            nodesConnectable={false}
-            elementsSelectable={false}
             panOnScroll
             zoomOnScroll
             zoomOnPinch
