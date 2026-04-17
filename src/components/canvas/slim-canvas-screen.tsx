@@ -31,6 +31,7 @@ import {
 import { createEdge, deleteEdge } from "@/lib/actions/edge.actions";
 import { deleteNode, updateNode } from "@/lib/actions/node.actions";
 import type { EdgeDTO, NodeDTO } from "@/lib/actions/dto";
+import { usePalette } from "@/lib/use-palette";
 
 type SlimCanvasScreenProps = {
   brainId: string;
@@ -284,6 +285,14 @@ export function SlimCanvasScreen({
     [brainId, brainName],
   );
 
+  const palette = usePalette();
+  const isThread = palette === "thread";
+  const backgroundDotColor = isThread
+    ? "rgba(255,255,255,0.06)"
+    : "rgba(30,18,6,0.08)";
+  const miniMapMaskColor = isThread ? "rgba(0,0,0,0.5)" : "rgba(30,18,6,0.18)";
+  const miniMapBgColor = isThread ? "rgba(0,0,0,0.35)" : "rgba(255,244,230,0.7)";
+
   return (
     <div
       className="relative flex h-full min-h-0 w-full flex-col"
@@ -307,13 +316,13 @@ export function SlimCanvasScreen({
             maxZoom={1.5}
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="rgba(255,255,255,0.06)" gap={20} size={1} />
+            <Background color={backgroundDotColor} gap={20} size={1} />
             <MiniMap
-              maskColor="rgba(0,0,0,0.5)"
-              style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+              maskColor={miniMapMaskColor}
+              style={{ backgroundColor: miniMapBgColor }}
             />
             <Controls
-              className="[&_button]:border-white/10 [&_button]:bg-[#2a2f38] [&_button]:fill-white"
+              className="[&_button]:border-border [&_button]:bg-card [&_button]:fill-foreground [&_button]:text-foreground"
               showInteractive={false}
             />
           </ReactFlow>
