@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import mongoose from "mongoose";
 
 import ChatMessage from "@/database/models/chat-message.model";
 import NodeModel from "@/database/models/node.model";
@@ -8,6 +9,29 @@ import type { ChatRole, IChatMessage, INode } from "@/types/db";
 
 import type { ChatMessageDTO } from "./dto";
 import { requireUserAndDb } from "./_helpers";
+
+function parseMessageCursor(
+  cursor: string,
+): { cursorDate: Date; cursorId: mongoose.Types.ObjectId } | null {
+  const pipe = cursor.indexOf("|");
+  if (pipe === -1) {
+    return null;
+  }
+  const iso = cursor.slice(0, pipe);
+  const id = cursor.slice(pipe + 1);
+  const cursorDate = new Date(iso);
+  if (Number.isNaN(cursorDate.getTime())) {
+    return null;
+  }
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return null;
+  }
+  return { cursorDate, cursorId: new mongoose.Types.ObjectId(id) };
+}
+
+function formatMessageCursor(doc: IChatMessage): string {
+  return `${doc.createdAt.toISOString()}|${String(doc._id)}`;
+}
 
 function toChatMessageDTO(doc: IChatMessage): ChatMessageDTO {
   return {
@@ -61,7 +85,7 @@ export async function appendChatMessage(
 
 export type ListMessagesInput = {
   chatNodeId: string;
-  /** Cursor is the ISO `createdAt` of the last message already loaded. */
+  /** Composite cursor: `{createdAt ISO}|{_id}` from the last loaded message. */
   cursor?: string;
   limit?: number;
 };
@@ -73,24 +97,45 @@ export async function listMessagesForChatNode(
 
   const limit = Math.min(Math.max(input.limit ?? 50, 1), 200);
 
-  const filter: Record<string, unknown> = {
+  const baseMatch = {
     chatNodeId: input.chatNodeId,
     ownerClerkId: userId,
   };
 
+  let filter: Record<string, unknown> = baseMatch;
+
   if (input.cursor) {
-    filter.createdAt = { $gt: new Date(input.cursor) };
+    const parsed = parseMessageCursor(input.cursor);
+    if (parsed) {
+      const { cursorDate, cursorId } = parsed;
+      filter = {
+        $and: [
+          baseMatch,
+          {
+            $or: [
+              { createdAt: { $gt: cursorDate } },
+              { createdAt: cursorDate, _id: { $gt: cursorId } },
+            ],
+          },
+        ],
+      };
+    } else if (!input.cursor.includes("|")) {
+      const legacyDate = new Date(input.cursor);
+      if (!Number.isNaN(legacyDate.getTime())) {
+        filter = { ...baseMatch, createdAt: { $gt: legacyDate } };
+      }
+    }
   }
 
   const docs = await ChatMessage.find(filter)
-    .sort({ createdAt: 1 })
+    .sort({ createdAt: 1, _id: 1 })
     .limit(limit + 1)
     .lean<IChatMessage[]>();
 
   const hasMore = docs.length > limit;
   const page = hasMore ? docs.slice(0, limit) : docs;
   const nextCursor = hasMore
-    ? page[page.length - 1].createdAt.toISOString()
+    ? formatMessageCursor(page[page.length - 1])
     : null;
 
   return {

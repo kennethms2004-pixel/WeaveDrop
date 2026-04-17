@@ -21,15 +21,21 @@ const edgeSchema = new Schema<IEdge>(
       ref: "Node",
       required: true,
     },
-    sourceHandle: { type: String },
-    targetHandle: { type: String },
+    sourceHandle: { type: String, default: "" },
+    targetHandle: { type: String, default: "" },
   },
   { timestamps: true },
 );
 
 edgeSchema.index({ brainId: 1, targetNodeId: 1 });
 edgeSchema.index(
-  { brainId: 1, sourceNodeId: 1, targetNodeId: 1 },
+  {
+    brainId: 1,
+    sourceNodeId: 1,
+    sourceHandle: 1,
+    targetNodeId: 1,
+    targetHandle: 1,
+  },
   { unique: true },
 );
 

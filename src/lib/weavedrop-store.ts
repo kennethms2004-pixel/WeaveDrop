@@ -7,7 +7,7 @@ import { create } from "zustand";
  *
  * All durable data (brains, nodes, edges, chats, ingestions) lives in MongoDB
  * and is fetched through server actions. This store is strictly for transient
- * canvas UI (selection, hover, drag preview, panel toggles) that does not need
+ * canvas UI (selection and hover) that does not need
  * to survive across sessions or users.
  */
 export type WeaveDropUIStore = {

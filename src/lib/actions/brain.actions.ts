@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { Types } from "mongoose";
+import mongoose, { type Types } from "mongoose";
 
 import Brain from "@/database/models/brain.model";
 import ChatMessage from "@/database/models/chat-message.model";
@@ -12,6 +12,10 @@ import type { IBrain } from "@/types/db";
 
 import type { BrainDTO } from "./dto";
 import { requireUserAndDb } from "./_helpers";
+
+function isValidBrainId(brainId: string): boolean {
+  return mongoose.Types.ObjectId.isValid(brainId);
+}
 
 function toBrainDTO(doc: IBrain): BrainDTO {
   return {
@@ -39,6 +43,10 @@ export async function getBrainById(
   brainId: string,
 ): Promise<BrainDTO | null> {
   const { userId } = await requireUserAndDb();
+
+  if (!isValidBrainId(brainId)) {
+    return null;
+  }
 
   const doc = await Brain.findOne({
     _id: brainId,
@@ -81,6 +89,10 @@ export async function renameBrain(
     throw new Error("Brain name cannot be empty");
   }
 
+  if (!isValidBrainId(brainId)) {
+    throw new Error("Brain not found");
+  }
+
   const updated = await Brain.findOneAndUpdate(
     { _id: brainId, ownerClerkId: userId },
     { $set: { name } },
@@ -100,6 +112,10 @@ export async function renameBrain(
 export async function touchBrainLastOpened(brainId: string): Promise<void> {
   const { userId } = await requireUserAndDb();
 
+  if (!isValidBrainId(brainId)) {
+    return;
+  }
+
   await Brain.updateOne(
     { _id: brainId, ownerClerkId: userId },
     { $set: { lastOpenedAt: new Date() } },
@@ -108,6 +124,10 @@ export async function touchBrainLastOpened(brainId: string): Promise<void> {
 
 export async function deleteBrain(brainId: string): Promise<void> {
   const { userId } = await requireUserAndDb();
+
+  if (!isValidBrainId(brainId)) {
+    return;
+  }
 
   const brain = await Brain.findOne({
     _id: brainId,

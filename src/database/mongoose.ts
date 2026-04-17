@@ -46,7 +46,16 @@ export async function connectToDatabase(): Promise<Mongoose> {
     cached.conn = await cached.promise;
   } catch (error) {
     cached.promise = null;
-    console.error("[mongoose] db connection error", error);
+    const err = error as {
+      name?: string;
+      message?: string;
+      code?: string | number;
+    };
+    console.error("[mongoose] db connection error - sanitized", {
+      name: err.name,
+      message: err.message,
+      code: err.code,
+    });
     throw error;
   }
 

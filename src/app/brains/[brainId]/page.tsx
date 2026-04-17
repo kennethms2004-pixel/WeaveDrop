@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 
 import { HomeScreen } from "@/components/brains/home-screen";
@@ -37,9 +38,10 @@ export default async function BrainCanvasPage({ params }: BrainCanvasPageProps) 
     redirect("/");
   }
 
-  // Fire-and-forget: don't block the page render on this metadata write.
-  void touchBrainLastOpened(brainId).catch(() => {
-    /* ignore */
+  after(async () => {
+    await touchBrainLastOpened(brainId).catch(() => {
+      /* ignore */
+    });
   });
 
   const selectedBrain: BrainDTO = brain;

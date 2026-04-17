@@ -4,7 +4,7 @@ import type { IBrain } from "@/types/db";
 
 const brainSchema = new Schema<IBrain>(
   {
-    ownerClerkId: { type: String, required: true, index: true },
+    ownerClerkId: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     nodeCount: { type: Number, default: 0 },
     edgeCount: { type: Number, default: 0 },

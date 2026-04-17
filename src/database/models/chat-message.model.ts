@@ -28,7 +28,11 @@ const chatMessageSchema = new Schema<IChatMessage>(
   { timestamps: true },
 );
 
-chatMessageSchema.index({ chatNodeId: 1, createdAt: 1 });
+chatMessageSchema.index({
+  ownerClerkId: 1,
+  chatNodeId: 1,
+  createdAt: 1,
+});
 
 const ChatMessage: Model<IChatMessage> =
   (models.ChatMessage as Model<IChatMessage>) ||

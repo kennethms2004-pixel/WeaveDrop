@@ -69,11 +69,18 @@ export async function upsertSourceIngestion(
   if (input.summary !== undefined) update.summary = input.summary;
   if (input.contentChunks !== undefined) update.contentChunks = input.contentChunks;
   if (input.status !== undefined) update.status = input.status;
-  if (input.errorMessage !== undefined) update.errorMessage = input.errorMessage;
+  if (input.errorMessage !== undefined) {
+    update.errorMessage = input.errorMessage;
+  } else if (input.status !== undefined && input.status !== "failed") {
+    update.errorMessage = null;
+  }
 
   const saved = await SourceIngestion.findOneAndUpdate(
-    { nodeId: input.nodeId },
-    { $set: update, $setOnInsert: { nodeId: input.nodeId } },
+    { nodeId: input.nodeId, ownerClerkId: userId },
+    {
+      $set: update,
+      $setOnInsert: { nodeId: input.nodeId, ownerClerkId: userId },
+    },
     { upsert: true, new: true },
   ).lean<ISourceIngestion>();
 
@@ -114,11 +121,15 @@ export async function setSourceStatus(
       { $set: { status } },
     ),
     SourceIngestion.updateOne(
-      { nodeId },
+      { nodeId, ownerClerkId: userId },
       {
         $set: {
           status,
-          ...(errorMessage !== undefined ? { errorMessage } : {}),
+          ...(errorMessage !== undefined
+            ? { errorMessage }
+            : status !== "failed"
+              ? { errorMessage: null }
+              : {}),
         },
       },
     ),

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import mongoose from "mongoose";
 
 import Brain from "@/database/models/brain.model";
 import Edge from "@/database/models/edge.model";
@@ -10,14 +11,18 @@ import type { IEdge, INode, NodeType } from "@/types/db";
 import type { EdgeDTO } from "./dto";
 import { requireUserAndDb } from "./_helpers";
 
+function handleToDto(value: string | undefined): string | null {
+  return value != null && value !== "" ? value : null;
+}
+
 function toEdgeDTO(doc: IEdge): EdgeDTO {
   return {
     id: String(doc._id),
     brainId: String(doc.brainId),
     sourceNodeId: String(doc.sourceNodeId),
     targetNodeId: String(doc.targetNodeId),
-    sourceHandle: doc.sourceHandle ?? null,
-    targetHandle: doc.targetHandle ?? null,
+    sourceHandle: handleToDto(doc.sourceHandle),
+    targetHandle: handleToDto(doc.targetHandle),
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
   };
@@ -90,43 +95,81 @@ export async function createEdge(input: CreateEdgeInput): Promise<EdgeDTO> {
     );
   }
 
-  const created = await Edge.create({
-    brainId: input.brainId,
-    ownerClerkId: userId,
-    sourceNodeId: input.sourceNodeId,
-    targetNodeId: input.targetNodeId,
-    sourceHandle: input.sourceHandle,
-    targetHandle: input.targetHandle,
-  });
+  const session = await mongoose.startSession();
+  let createdPlain: IEdge | null = null;
 
-  await Brain.updateOne(
-    { _id: input.brainId, ownerClerkId: userId },
-    { $inc: { edgeCount: 1 } },
-  );
+  try {
+    await session.withTransaction(async () => {
+      const createdDocs = await Edge.create(
+        [
+          {
+            brainId: input.brainId,
+            ownerClerkId: userId,
+            sourceNodeId: input.sourceNodeId,
+            targetNodeId: input.targetNodeId,
+            sourceHandle: input.sourceHandle ?? "",
+            targetHandle: input.targetHandle ?? "",
+          },
+        ],
+        { session },
+      );
 
-  revalidatePath(`/brains/${input.brainId}`);
+      const created = createdDocs[0];
+      if (!created) {
+        throw new Error("Failed to create edge");
+      }
 
-  return toEdgeDTO(created.toObject() as IEdge);
+      await Brain.updateOne(
+        { _id: input.brainId, ownerClerkId: userId },
+        { $inc: { edgeCount: 1 } },
+        { session },
+      );
+
+      createdPlain = created.toObject() as IEdge;
+    });
+
+    if (!createdPlain) {
+      throw new Error("Failed to create edge");
+    }
+
+    revalidatePath(`/brains/${input.brainId}`);
+
+    return toEdgeDTO(createdPlain);
+  } finally {
+    await session.endSession();
+  }
 }
 
 export async function deleteEdge(edgeId: string): Promise<void> {
   const { userId } = await requireUserAndDb();
 
-  const edge = await Edge.findOne({
-    _id: edgeId,
-    ownerClerkId: userId,
-  }).lean<IEdge | null>();
+  const session = await mongoose.startSession();
+  let brainIdForRevalidate: string | null = null;
 
-  if (!edge) {
-    return;
+  try {
+    await session.withTransaction(async () => {
+      const edge = await Edge.findOneAndDelete(
+        { _id: edgeId, ownerClerkId: userId },
+        { session },
+      );
+
+      if (!edge) {
+        return;
+      }
+
+      brainIdForRevalidate = String(edge.brainId);
+
+      await Brain.updateOne(
+        { _id: edge.brainId, ownerClerkId: userId },
+        { $inc: { edgeCount: -1 } },
+        { session },
+      );
+    });
+
+    if (brainIdForRevalidate) {
+      revalidatePath(`/brains/${brainIdForRevalidate}`);
+    }
+  } finally {
+    await session.endSession();
   }
-
-  await Edge.deleteOne({ _id: edgeId, ownerClerkId: userId });
-
-  await Brain.updateOne(
-    { _id: edge.brainId, ownerClerkId: userId },
-    { $inc: { edgeCount: -1 } },
-  );
-
-  revalidatePath(`/brains/${String(edge.brainId)}`);
 }

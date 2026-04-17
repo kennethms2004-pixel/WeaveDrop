@@ -10,6 +10,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 import type {
   Connection,
   Edge as RFEdge,
@@ -102,6 +103,8 @@ export function SlimCanvasScreen({
     initialEdges.map(edgeDtoToFlow),
   );
 
+  const router = useRouter();
+
   const [, startTransition] = useTransition();
   const positionTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
@@ -128,39 +131,107 @@ export function SlimCanvasScreen({
     [],
   );
 
+  const cancelScheduledPositionPersist = useCallback((nodeId: string) => {
+    const existing = positionTimers.current.get(nodeId);
+    if (existing) {
+      clearTimeout(existing);
+      positionTimers.current.delete(nodeId);
+    }
+  }, []);
+
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      setNodes((current) => applyNodeChanges(changes, current));
+      const removedById = new Map<string, RFNode>();
+
+      setNodes((current) => {
+        for (const change of changes) {
+          if (change.type === "remove") {
+            const node = current.find((n) => n.id === change.id);
+            if (node) {
+              removedById.set(change.id, { ...node });
+            }
+          }
+        }
+        return applyNodeChanges(changes, current);
+      });
+
+      const removedNodeIds = new Set<string>();
+      for (const change of changes) {
+        if (change.type === "remove") {
+          removedNodeIds.add(change.id);
+          cancelScheduledPositionPersist(change.id);
+        }
+      }
 
       for (const change of changes) {
-        if (change.type === "position" && change.position && !change.dragging) {
+        if (
+          change.type === "position" &&
+          change.position &&
+          !change.dragging &&
+          !removedNodeIds.has(change.id)
+        ) {
           schedulePositionPersist(change.id, change.position);
         }
         if (change.type === "remove") {
+          const snapshot = removedById.get(change.id);
           startTransition(() => {
             deleteNode(change.id).catch((error) => {
               console.error("[canvas] deleteNode failed", error);
+              if (snapshot) {
+                setNodes((current) =>
+                  current.some((n) => n.id === snapshot.id)
+                    ? current
+                    : [...current, snapshot],
+                );
+              } else {
+                router.refresh();
+              }
             });
           });
         }
       }
     },
-    [schedulePositionPersist],
+    [cancelScheduledPositionPersist, router, schedulePositionPersist],
   );
 
-  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
-    setEdges((current) => applyEdgeChanges(changes, current));
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      const removedById = new Map<string, RFEdge>();
 
-    for (const change of changes) {
-      if (change.type === "remove") {
-        startTransition(() => {
-          deleteEdge(change.id).catch((error) => {
-            console.error("[canvas] deleteEdge failed", error);
+      setEdges((current) => {
+        for (const change of changes) {
+          if (change.type === "remove") {
+            const edge = current.find((e) => e.id === change.id);
+            if (edge) {
+              removedById.set(change.id, { ...edge });
+            }
+          }
+        }
+        return applyEdgeChanges(changes, current);
+      });
+
+      for (const change of changes) {
+        if (change.type === "remove") {
+          const snapshot = removedById.get(change.id);
+          startTransition(() => {
+            deleteEdge(change.id).catch((error) => {
+              console.error("[canvas] deleteEdge failed", error);
+              if (snapshot) {
+                setEdges((current) =>
+                  current.some((e) => e.id === snapshot.id)
+                    ? current
+                    : [...current, snapshot],
+                );
+              } else {
+                router.refresh();
+              }
+            });
           });
-        });
+        }
       }
-    }
-  }, []);
+    },
+    [router],
+  );
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -178,11 +249,15 @@ export function SlimCanvasScreen({
         })
           .then((created) => {
             setEdges((current) => [
-              ...current.filter(
-                (e) =>
-                  !(e.source === created.sourceNodeId &&
-                    e.target === created.targetNodeId),
-              ),
+              ...current.filter((e) => {
+                const sameEndpoints =
+                  e.source === created.sourceNodeId &&
+                  e.target === created.targetNodeId;
+                const sameHandles =
+                  (e.sourceHandle ?? null) === (created.sourceHandle ?? null) &&
+                  (e.targetHandle ?? null) === (created.targetHandle ?? null);
+                return !(sameEndpoints && sameHandles);
+              }),
               edgeDtoToFlow(created),
             ]);
           })

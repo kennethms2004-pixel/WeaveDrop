@@ -141,17 +141,22 @@ export async function deleteNode(nodeId: string): Promise<void> {
     SourceIngestion.deleteMany({ nodeId, ownerClerkId: userId }),
   ]);
 
-  await NodeModel.deleteOne({ _id: nodeId, ownerClerkId: userId });
+  const deleteResult = await NodeModel.deleteOne({
+    _id: nodeId,
+    ownerClerkId: userId,
+  });
 
-  await Brain.updateOne(
-    { _id: node.brainId, ownerClerkId: userId },
-    {
-      $inc: {
-        nodeCount: -1,
-        edgeCount: -(edgeResult?.deletedCount ?? 0),
+  if (deleteResult.deletedCount > 0) {
+    await Brain.updateOne(
+      { _id: node.brainId, ownerClerkId: userId },
+      {
+        $inc: {
+          nodeCount: -1,
+          edgeCount: -(edgeResult?.deletedCount ?? 0),
+        },
       },
-    },
-  );
+    );
+  }
 
   revalidatePath(`/brains/${String(node.brainId)}`);
 }
