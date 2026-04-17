@@ -104,3 +104,109 @@
 body {
   min-height: 100vh;
 }
+
+@layer components {
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .stitch-rule {
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--ink-3) 0 3px,
+      transparent 3px 9px
+    );
+    opacity: 0.55;
+  }
+
+  .hero-fiber {
+    background-image:
+      repeating-linear-gradient(
+        110deg,
+        transparent 0 14px,
+        color-mix(in oklch, var(--ink) 3%, transparent) 14px 15px
+      ),
+      repeating-linear-gradient(
+        -70deg,
+        transparent 0 22px,
+        color-mix(in oklch, var(--ink) 2%, transparent) 22px 23px
+      );
+  }
+
+  .weave-panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-lg);
+  }
+
+  .weave-chip {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    color: var(--fg-subtle);
+    background: color-mix(in oklch, var(--ink) 3%, transparent);
+  }
+
+  .btn-primary {
+    background: var(--brand);
+    color: var(--paper);
+    font-family: var(--font-ui);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    transition:
+      transform var(--dur-quick) var(--ease),
+      box-shadow var(--dur-quick) var(--ease),
+      background var(--dur-quick) var(--ease);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+    background: var(--brand-deep);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--rule);
+    font-family: var(--font-ui);
+    font-weight: 500;
+    transition:
+      background var(--dur-quick) var(--ease),
+      border-color var(--dur-quick) var(--ease);
+  }
+
+  .btn-secondary:hover {
+    background: color-mix(in oklch, var(--ink) 4%, transparent);
+    border-color: color-mix(in oklch, var(--ink) 30%, transparent);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--fg-muted);
+    font-family: var(--font-ui);
+    font-weight: 500;
+    transition:
+      background var(--dur-quick) var(--ease),
+      color var(--dur-quick) var(--ease);
+  }
+
+  .btn-ghost:hover {
+    color: var(--fg);
+    background: color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+}

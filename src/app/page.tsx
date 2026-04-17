@@ -1,4 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 import { HomeScreen } from "@/components/brains/home-screen";
 import { listBrainsForUser } from "@/lib/actions/brain.actions";
@@ -14,7 +15,11 @@ export default async function Page({
 
   const { userId } = await auth();
 
-  const initialBrains: BrainDTO[] = userId ? await listBrainsForUser() : [];
+  if (!userId) {
+    redirect("/welcome");
+  }
+
+  const initialBrains: BrainDTO[] = await listBrainsForUser();
 
   return (
     <HomeScreen
