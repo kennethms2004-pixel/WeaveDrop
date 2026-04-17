@@ -1,25 +1,31 @@
 @import "tailwindcss";
+@import "../styles/weave-tokens.css";
 
+/* Map shadcn-style Tailwind theme variables to Weave semantic tokens.
+   These resolve automatically per palette because Weave tokens themselves
+   are redefined under [data-palette="loom"] / [data-palette="thread"]. */
 :root {
-  --background: oklch(0.12 0.01 286);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.17 0.01 286);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.14 0.01 286);
-  --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.96 0 0);
-  --primary-foreground: oklch(0.17 0.01 286);
-  --secondary: oklch(0.22 0.01 286);
-  --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.2 0.01 286);
-  --muted-foreground: oklch(0.71 0 0);
-  --accent: oklch(0.24 0.01 286);
-  --accent-foreground: oklch(0.97 0 0);
-  --destructive: oklch(0.64 0.24 24);
-  --border: oklch(1 0 0 / 0.1);
-  --input: oklch(1 0 0 / 0.12);
-  --ring: oklch(0.86 0.02 286);
-  --radius: 0.875rem;
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--surface);
+  --card-foreground: var(--fg);
+  --popover: var(--surface);
+  --popover-foreground: var(--fg);
+  --primary: var(--brand);
+  --primary-foreground: var(--paper);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--fg);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--fg-muted);
+  --accent: var(--brand-soft);
+  --accent-foreground: var(--fg);
+  --destructive: var(--danger);
+  --border: var(--rule);
+  --input: var(--rule-soft);
+  --ring: var(--brand);
+  /* Weave uses a low editorial radius scale; keep slightly higher default
+     for shadcn-style controls and let tight chrome opt into smaller radii. */
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -41,35 +47,31 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Weave extensions exposed as Tailwind color utilities. */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-rule: var(--rule);
+  --color-rule-soft: var(--rule-soft);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-soft: var(--brand-soft);
+  --color-terracotta: var(--terracotta);
+  --color-ochre: var(--ochre);
+  --color-madder: var(--madder);
+  --color-moss: var(--moss);
+  --color-rust: var(--rust);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: oklch(0.99 0 0);
-    --foreground: oklch(0.15 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.15 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.15 0 0);
-    --primary: oklch(0.17 0 0);
-    --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.96 0 0);
-    --secondary-foreground: oklch(0.17 0 0);
-    --muted: oklch(0.96 0 0);
-    --muted-foreground: oklch(0.55 0 0);
-    --accent: oklch(0.96 0 0);
-    --accent-foreground: oklch(0.17 0 0);
-    --destructive: oklch(0.58 0.22 27);
-    --border: oklch(0.92 0 0);
-    --input: oklch(0.92 0 0);
-    --ring: oklch(0.7 0 0);
-  }
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-display);
 }
 
 @layer base {
@@ -77,8 +79,25 @@
     @apply border-border outline-ring/50;
   }
 
+  html,
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    background: var(--bg);
+    color: var(--fg);
+    transition:
+      background var(--dur-base) var(--ease),
+      color var(--dur-base) var(--ease);
+  }
+
+  body {
+    @apply font-sans antialiased;
+    font-size: var(--t-body);
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--brand);
+    color: var(--paper);
   }
 }
 
