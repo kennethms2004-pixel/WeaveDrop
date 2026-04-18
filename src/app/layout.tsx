@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from "next/font/google";
 import Script from "next/script";
 import { Suspense } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkLoading, ClerkProvider } from "@clerk/nextjs";
 
+import { AuthWaitingScreen } from "@/components/auth/auth-waiting-screen";
 import { WelcomePaletteGate } from "@/components/welcome-palette-gate";
+import { weaveClerkAppearance } from "@/lib/clerk-appearance";
 import { PALETTE_STORAGE_KEY, DEFAULT_PALETTE } from "@/lib/brand";
 
 import "./globals.css";
@@ -89,23 +91,10 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="flex min-h-full flex-col">
-        <ClerkProvider
-          appearance={{
-            variables: {
-              colorPrimary: "var(--brand)",
-              colorBackground: "var(--bg)",
-              colorInputBackground: "var(--surface)",
-              colorInputText: "var(--fg)",
-              colorText: "var(--fg)",
-              colorTextSecondary: "var(--fg-muted)",
-              colorDanger: "var(--danger)",
-              colorSuccess: "var(--positive)",
-              colorWarning: "var(--warning)",
-              borderRadius: "var(--r-md)",
-              fontFamily: "var(--font-ui)",
-            },
-          }}
-        >
+        <ClerkProvider appearance={weaveClerkAppearance}>
+          <ClerkLoading>
+            <AuthWaitingScreen />
+          </ClerkLoading>
           <Suspense fallback={null}>
             <WelcomePaletteGate />
           </Suspense>
