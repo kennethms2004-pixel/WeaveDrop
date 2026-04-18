@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from "next/font/google";
 import Script from "next/script";
+import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 
+import { WelcomePaletteGate } from "@/components/welcome-palette-gate";
 import { PALETTE_STORAGE_KEY, DEFAULT_PALETTE } from "@/lib/brand";
 
 import "./globals.css";
@@ -42,11 +44,17 @@ export const metadata: Metadata = {
 };
 
 // Runs before hydration to avoid a flash of the wrong palette.
-// When no explicit user choice is stored, follow the OS prefers-color-scheme
-// (dark -> "thread", otherwise -> "loom", which matches the brand default).
+// Landing (/welcome) is always light — no dark palette there, signed-in or not.
+// Everywhere else: stored choice, or OS prefers-color-scheme, or default.
 const paletteBootstrap = `
 (function(){
   try {
+    var path = typeof location !== "undefined" ? location.pathname : "";
+    var onWelcome = path === "/welcome" || path.indexOf("/welcome/") === 0;
+    if (onWelcome) {
+      document.documentElement.dataset.palette = "loom";
+      return;
+    }
     var stored = localStorage.getItem(${JSON.stringify(PALETTE_STORAGE_KEY)});
     var palette;
     if (stored === "loom" || stored === "thread") {
@@ -98,6 +106,9 @@ export default function RootLayout({
             },
           }}
         >
+          <Suspense fallback={null}>
+            <WelcomePaletteGate />
+          </Suspense>
           {children}
         </ClerkProvider>
       </body>
