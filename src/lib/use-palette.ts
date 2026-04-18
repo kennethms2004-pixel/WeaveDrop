@@ -10,6 +10,35 @@ import {
 
 export const PALETTE_EVENT = "weavedrop:palette-change";
 
+/** DOM + hook sync only (no localStorage). Matches inline bootstrap when not persisting. */
+export function applyPaletteToDocument(next: Palette) {
+  if (typeof document === "undefined") return;
+  document.documentElement.dataset.palette = next;
+  window.dispatchEvent(new CustomEvent<Palette>(PALETTE_EVENT, { detail: next }));
+}
+
+/** Resolve palette from stored choice, else OS preference, else brand default. */
+export function resolveBootstrapPalette(): Palette {
+  if (typeof window === "undefined") {
+    return DEFAULT_PALETTE;
+  }
+  try {
+    const stored = localStorage.getItem(PALETTE_STORAGE_KEY);
+    if (stored === "loom" || stored === "thread") {
+      return stored;
+    }
+  } catch {
+    /* ignore */
+  }
+  if (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "thread";
+  }
+  return DEFAULT_PALETTE;
+}
+
 function readPalette(): Palette {
   if (typeof document === "undefined") {
     return DEFAULT_PALETTE;
@@ -53,11 +82,10 @@ export function usePalette(): Palette {
 
 export function setPalette(next: Palette) {
   if (typeof document === "undefined") return;
-  document.documentElement.dataset.palette = next;
   try {
     localStorage.setItem(PALETTE_STORAGE_KEY, next);
   } catch {
     /* ignore storage errors (private mode, etc.) */
   }
-  window.dispatchEvent(new CustomEvent<Palette>(PALETTE_EVENT, { detail: next }));
+  applyPaletteToDocument(next);
 }

@@ -876,25 +876,27 @@ export function HomeScreen({
           </div>
 
           <div className="flex flex-col py-2">
-            <SettingsGroupHeader>Appearance</SettingsGroupHeader>
-            <SettingsMenuRow
-              icon={
-                palette === "thread" ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )
-              }
-              label={palette === "thread" ? "Light mode" : "Dark mode"}
-              onClick={() =>
-                setPalette(palette === "thread" ? "loom" : "thread")
-              }
-              right={
-                <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-subtle">
-                  {palette === "thread" ? "Thread" : "Loom"}
-                </span>
-              }
-            />
+            <Show when="signed-in">
+              <SettingsGroupHeader>Appearance</SettingsGroupHeader>
+              <SettingsMenuRow
+                icon={
+                  palette === "thread" ? (
+                    <Sun className="h-4 w-4" />
+                  ) : (
+                    <Moon className="h-4 w-4" />
+                  )
+                }
+                label={palette === "thread" ? "Light mode" : "Dark mode"}
+                onClick={() =>
+                  setPalette(palette === "thread" ? "loom" : "thread")
+                }
+                right={
+                  <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-fg-subtle">
+                    {palette === "thread" ? "Thread" : "Loom"}
+                  </span>
+                }
+              />
+            </Show>
 
             <SettingsGroupHeader>Account</SettingsGroupHeader>
             <Show when="signed-out">
