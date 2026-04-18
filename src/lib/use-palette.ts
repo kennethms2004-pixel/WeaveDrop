@@ -10,7 +10,7 @@ import {
 
 export const PALETTE_EVENT = "weavedrop:palette-change";
 
-/** DOM + hook sync only (does not write localStorage). */
+/** DOM + hook sync only (no localStorage). Matches bootstrap when not persisting choice. */
 export function applyPaletteToDocument(next: Palette) {
   if (typeof document === "undefined") return;
   document.documentElement.dataset.palette = next;
