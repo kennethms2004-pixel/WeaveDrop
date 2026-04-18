@@ -81,6 +81,8 @@ const NODE_DATA_DEBOUNCE_MS = 500;
 const ADD_PANEL_ID = "canvas-add-node-panel";
 const CHAT_PANEL_ID = "canvas-chat-panel";
 
+const EMPTY_CHAT_MESSAGES: ChatMessageDTO[] = [];
+
 const NODE_WIDTHS: Record<NodeType, number> = {
   note: 360,
   chat: 440,
@@ -149,14 +151,17 @@ function resolveFlowNodeType(kind: NodeType): string {
   return kind === "source" ? "default" : kind;
 }
 
-function resolveLabel(dto: NodeDTO): string {
-  const title = getNodeTitle(dto.data);
-  const text = getNodeText(dto.data);
+function labelFromNodeData(
+  type: NodeType,
+  data: Record<string, unknown>,
+): string {
+  const title = getNodeTitle(data);
+  const text = getNodeText(data);
 
   if (title) return title;
   if (text) return text.length > 40 ? `${text.slice(0, 40)}…` : text;
 
-  switch (dto.type) {
+  switch (type) {
     case "source":
       return "Source";
     case "note":
@@ -166,6 +171,10 @@ function resolveLabel(dto: NodeDTO): string {
     default:
       return "Node";
   }
+}
+
+function resolveLabel(dto: NodeDTO): string {
+  return labelFromNodeData(dto.type, dto.data);
 }
 
 function nodeDtoToFlow(dto: NodeDTO): CanvasNode {
@@ -326,6 +335,14 @@ export function SlimCanvasScreen({
   const activeChatNodeId =
     sidePanel?.type === "chat" ? sidePanel.nodeId : null;
 
+  const activeChatMessages = useMemo(
+    () =>
+      activeChatNodeId
+        ? chatMessagesByNode[activeChatNodeId] ?? EMPTY_CHAT_MESSAGES
+        : EMPTY_CHAT_MESSAGES,
+    [activeChatNodeId, chatMessagesByNode],
+  );
+
   const schedulePositionPersist = useCallback(
     (nodeId: string, position: { x: number; y: number }) => {
       const existing = positionTimers.current.get(nodeId);
@@ -447,13 +464,7 @@ export function SlimCanvasScreen({
             ...node,
             data: {
               ...updatedData,
-              label:
-                nextPayload.title ||
-                (nextPayload.text
-                  ? nextPayload.text.length > 40
-                    ? `${nextPayload.text.slice(0, 40)}…`
-                    : nextPayload.text
-                  : "Note"),
+              label: labelFromNodeData("note", updatedData),
             },
           };
         }),
@@ -712,7 +723,7 @@ export function SlimCanvasScreen({
     }
 
     scrollWrap.scrollTop = scrollWrap.scrollHeight;
-  }, [activeChatNodeId, chatMessagesByNode]);
+  }, [activeChatNodeId, activeChatMessages]);
 
   const palette = usePalette();
   const isThread = palette === "thread";
@@ -800,10 +811,6 @@ export function SlimCanvasScreen({
         : null,
     [activeChatNodeId, nodes],
   );
-
-  const activeChatMessages = activeChatNodeId
-    ? chatMessagesByNode[activeChatNodeId] ?? []
-    : [];
 
   const handleCreateCanvasNode = useCallback(
     (kind: "note" | "chat") => {

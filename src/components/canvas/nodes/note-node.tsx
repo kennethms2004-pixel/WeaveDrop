@@ -25,6 +25,12 @@ export function NoteNode({
     resizeTextarea(bodyRef.current);
   }, [data.text, isEditingBody]);
 
+  useEffect(() => {
+    if (isEditingBody) {
+      bodyRef.current?.focus();
+    }
+  }, [isEditingBody]);
+
   return (
     <NodeShell selected={selected}>
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
