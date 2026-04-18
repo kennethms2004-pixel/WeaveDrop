@@ -1,0 +1,1806 @@
+<!doctype html>
+<html lang="en" data-palette="loom">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Weave — Design System</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   WEAVE — Design Tokens
+   Two palettes: "loom" (default, light cream) and "thread" (darker oxblood).
+   Toggle via [data-palette="thread"] on <html>.
+   ========================================================= */
+
+:root,
+[data-palette="loom"] {
+  /* Paper & ink */
+  --paper:        oklch(0.972 0.012 78);   /* warm cream */
+  --paper-2:      oklch(0.955 0.014 75);   /* slightly deeper cream (cards) */
+  --paper-3:      oklch(0.935 0.018 72);   /* deeper, for wells */
+  --ink:          oklch(0.215 0.018 55);   /* warm near-black */
+  --ink-2:        oklch(0.38 0.018 55);    /* body gray */
+  --ink-3:        oklch(0.56 0.018 60);    /* muted label gray */
+  --ink-4:        oklch(0.74 0.014 65);    /* hairline gray */
+  --rule:         oklch(0.86 0.015 70);    /* divider */
+  --rule-soft:    oklch(0.90 0.012 72);
+
+  /* Brand accents */
+  --terracotta:   oklch(0.58 0.135 42);    /* primary brand */
+  --terracotta-2: oklch(0.50 0.140 38);    /* pressed */
+  --ochre:        oklch(0.72 0.125 80);    /* secondary */
+  --madder:       oklch(0.46 0.135 28);    /* deep red for emphasis */
+  --moss:         oklch(0.52 0.065 125);   /* positive */
+  --rust:         oklch(0.55 0.15 35);     /* alert */
+
+  /* Semantic */
+  --bg:           var(--paper);
+  --surface:      var(--paper-2);
+  --surface-2:    var(--paper-3);
+  --fg:           var(--ink);
+  --fg-muted:     var(--ink-2);
+  --fg-subtle:    var(--ink-3);
+  --brand:        var(--terracotta);
+  --brand-deep:   var(--madder);
+  --brand-soft:   oklch(0.88 0.045 55);
+  --positive:     var(--moss);
+  --warning:      var(--ochre);
+  --danger:       var(--rust);
+
+  /* Chart ramp (warm, harmonious) */
+  --chart-1: oklch(0.58 0.135 42);
+  --chart-2: oklch(0.72 0.125 80);
+  --chart-3: oklch(0.46 0.135 28);
+  --chart-4: oklch(0.52 0.065 125);
+  --chart-5: oklch(0.62 0.055 55);
+  --chart-6: oklch(0.38 0.05  50);
+}
+
+[data-palette="thread"] {
+  --paper:        oklch(0.185 0.012 40);
+  --paper-2:      oklch(0.225 0.014 42);
+  --paper-3:      oklch(0.265 0.017 42);
+  --ink:          oklch(0.95 0.012 80);
+  --ink-2:        oklch(0.80 0.012 75);
+  --ink-3:        oklch(0.62 0.014 70);
+  --ink-4:        oklch(0.42 0.014 65);
+  --rule:         oklch(0.34 0.015 50);
+  --rule-soft:    oklch(0.29 0.014 48);
+
+  --terracotta:   oklch(0.70 0.135 45);
+  --terracotta-2: oklch(0.78 0.125 48);
+  --ochre:        oklch(0.80 0.130 82);
+  --madder:       oklch(0.60 0.150 28);
+  --moss:         oklch(0.70 0.075 125);
+  --rust:         oklch(0.68 0.155 35);
+
+  --brand-soft:   oklch(0.34 0.08 45);
+
+  --chart-1: oklch(0.72 0.135 45);
+  --chart-2: oklch(0.82 0.125 82);
+  --chart-3: oklch(0.66 0.150 28);
+  --chart-4: oklch(0.72 0.075 125);
+  --chart-5: oklch(0.68 0.050 55);
+  --chart-6: oklch(0.58 0.050 50);
+}
+
+/* Type */
+:root {
+  --font-display: "Newsreader", "Source Serif 4", Georgia, serif;
+  --font-ui:      "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "JetBrains Mono", monospace;
+
+  /* Type scale — editorial, generous */
+  --t-display: clamp(56px, 8vw, 112px);
+  --t-h1: 56px;
+  --t-h2: 40px;
+  --t-h3: 28px;
+  --t-h4: 20px;
+  --t-body: 16px;
+  --t-small: 14px;
+  --t-micro: 12px;
+  --t-mono-label: 11px;
+
+  /* Spacing — 4px baseline */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  /* Radius (low — editorial) */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --r-full: 999px;
+
+  /* Shadows — warm, subtle */
+  --shadow-1: 0 1px 0 rgba(60, 30, 10, 0.04), 0 1px 2px rgba(60, 30, 10, 0.05);
+  --shadow-2: 0 2px 4px rgba(60, 30, 10, 0.06), 0 8px 16px rgba(60, 30, 10, 0.05);
+  --shadow-3: 0 6px 12px rgba(60, 30, 10, 0.07), 0 20px 40px rgba(60, 30, 10, 0.08);
+
+  --dur-quick: 140ms;
+  --dur-base:  240ms;
+  --dur-slow:  420ms;
+  --ease:      cubic-bezier(0.2, 0.65, 0.25, 1);
+
+  --container: 1200px;
+  --grid-gutter: 24px;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: var(--t-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
+}
+
+::selection { background: var(--brand); color: var(--paper); }
+
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--fg);
+  text-wrap: balance;
+}
+h1 { font-size: var(--t-h1); line-height: 1.04; letter-spacing: -0.025em; }
+h2 { font-size: var(--t-h2); line-height: 1.08; letter-spacing: -0.02em; }
+h3 { font-size: var(--t-h3); line-height: 1.2;  letter-spacing: -0.015em; }
+h4 { font-size: var(--t-h4); line-height: 1.3;  letter-spacing: -0.01em; font-weight: 500; }
+
+p { margin: 0; text-wrap: pretty; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--t-mono-label);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+
+hr.rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--s-6);
+}
+
+/* =========================================================
+   WEAVE — Page layout + components
+   ========================================================= */
+
+/* ---------- Page chrome ---------- */
+.page-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in oklab, var(--paper) 85%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.page-head__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  height: 64px;
+  padding: 0 var(--s-6);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.page-head__nav {
+  display: flex;
+  gap: var(--s-5);
+  margin-left: auto;
+}
+.page-head__nav a {
+  font-size: 13px;
+  color: var(--fg-muted);
+  transition: color var(--dur-quick) var(--ease);
+}
+.page-head__nav a:hover { color: var(--fg); }
+
+.palette-switch {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-full);
+  padding: 3px;
+}
+.palette-switch button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--fg-subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease);
+}
+.palette-switch button[aria-pressed="true"] {
+  background: var(--fg);
+  color: var(--paper);
+}
+
+/* ---------- Section wrapper ---------- */
+section.ds {
+  padding: var(--s-10) var(--s-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  scroll-margin-top: 80px;
+}
+.ds + .ds { border-top: 1px solid var(--rule); }
+
+.section-head {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--s-6);
+  margin-bottom: var(--s-8);
+  align-items: start;
+}
+.section-head__num { color: var(--fg-subtle); }
+.section-head__title h2 {
+  margin-bottom: var(--s-3);
+}
+.section-head__title p.lede {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--fg-muted);
+  max-width: 52ch;
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ---------- HERO ---------- */
+.hero {
+  padding: var(--s-10) var(--s-6) var(--s-9);
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+.hero__label {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  margin-bottom: var(--s-7);
+}
+.hero__label .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--brand);
+}
+.hero__title {
+  font-family: var(--font-display);
+  font-size: var(--t-display);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  font-weight: 300;
+  margin-bottom: var(--s-7);
+  max-width: 14ch;
+}
+.hero__title em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--brand);
+}
+.hero__meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-6);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s-5);
+  max-width: 900px;
+}
+.hero__meta dt { color: var(--fg-subtle); margin-bottom: var(--s-2); }
+.hero__meta dd { margin: 0; font-family: var(--font-display); font-size: 20px; letter-spacing: -0.01em; }
+
+.hero__weave {
+  position: absolute;
+  right: -40px;
+  top: 80px;
+  width: 360px;
+  height: 360px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ---------- Wordmark ---------- */
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  font-size: 28px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+.wordmark__w {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-right: 6px;
+  position: relative;
+  top: 3px;
+}
+
+/* ---------- Color tokens ---------- */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--s-4);
+}
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+.swatch__chip {
+  aspect-ratio: 1 / 1.1;
+  border-radius: var(--r-sm);
+  border: 1px solid color-mix(in oklab, var(--ink) 10%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+.swatch__name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+.swatch__var {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-subtle);
+}
+
+.palette-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: var(--s-6);
+  padding: var(--s-5) 0;
+  border-top: 1px solid var(--rule);
+  align-items: start;
+}
+.palette-row:last-child { border-bottom: 1px solid var(--rule); }
+.palette-row h4 { margin-bottom: var(--s-1); }
+.palette-row .mono { font-size: 11px; }
+
+/* ---------- Type specimens ---------- */
+.type-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--s-6);
+  padding: var(--s-6) 0;
+  border-top: 1px solid var(--rule);
+  align-items: baseline;
+}
+.type-row:last-child { border-bottom: 1px solid var(--rule); }
+.type-row__meta .mono { display: block; margin-bottom: var(--s-1); }
+.type-row__meta .name { font-family: var(--font-display); font-size: 18px; }
+.type-row__sample { color: var(--fg); }
+
+.specimen-display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 96px;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+.specimen-display em { font-style: italic; color: var(--brand); }
+
+/* ---------- Spacing ---------- */
+.space-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 80px;
+  align-items: center;
+  gap: var(--s-5);
+  padding: var(--s-3) 0;
+  border-bottom: 1px dashed var(--rule-soft);
+}
+.space-bar {
+  background: var(--brand);
+  height: 12px;
+  border-radius: 2px;
+}
+.space-row .mono { font-size: 11px; }
+.space-row .token { font-family: var(--font-display); font-size: 16px; }
+
+/* ---------- Radius, shadow ---------- */
+.tile-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--s-5);
+}
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: var(--s-6);
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.tile__name { font-family: var(--font-display); font-size: 17px; }
+.tile__sample {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  height: 56px;
+  margin-top: var(--s-4);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  --btn-bg: var(--fg);
+  --btn-fg: var(--paper);
+  --btn-border: var(--fg);
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: 40px;
+  padding: 0 var(--s-5);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--r-sm);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease);
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-1); }
+.btn:active { transform: translateY(0); box-shadow: none; }
+
+.btn--brand { --btn-bg: var(--brand); --btn-border: var(--brand); --btn-fg: var(--paper); }
+.btn--outline {
+  --btn-bg: transparent;
+  --btn-fg: var(--fg);
+  --btn-border: var(--fg);
+}
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--fg);
+  --btn-border: transparent;
+}
+.btn--ghost:hover { background: var(--surface); }
+.btn--sm { height: 32px; padding: 0 var(--s-4); font-size: 13px; }
+.btn--lg { height: 48px; padding: 0 var(--s-6); font-size: 15px; }
+
+.btn__arrow { width: 14px; height: 14px; }
+
+/* ---------- Inputs ---------- */
+.input-group { display: flex; flex-direction: column; gap: var(--s-2); }
+.input-group label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+.input {
+  appearance: none;
+  height: 40px;
+  padding: 0 var(--s-4);
+  background: var(--paper);
+  color: var(--fg);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  outline: none;
+  transition: border-color var(--dur-quick) var(--ease), box-shadow var(--dur-quick) var(--ease);
+}
+.input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--brand) 20%, transparent);
+}
+.input--ta { height: auto; padding: var(--s-3) var(--s-4); resize: vertical; min-height: 90px; font-family: var(--font-ui); }
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  cursor: pointer;
+  font-size: 14px;
+}
+.check input { appearance: none; width: 16px; height: 16px; border: 1px solid var(--ink-3); border-radius: 3px; background: var(--paper); cursor: pointer; position: relative; }
+.check input:checked { background: var(--fg); border-color: var(--fg); }
+.check input:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 5px; height: 9px;
+  border: solid var(--paper);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--ink-4);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--dur-quick) var(--ease);
+  flex-shrink: 0;
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: var(--paper);
+  border-radius: 50%;
+  transition: left var(--dur-quick) var(--ease);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.toggle.on { background: var(--brand); }
+.toggle.on::after { left: 20px; }
+
+/* ---------- Badges / chips ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--surface);
+  color: var(--fg-muted);
+  border: 1px solid var(--rule);
+}
+.badge--brand { background: var(--brand-soft); color: var(--brand-deep); border-color: transparent; }
+.badge--positive { background: color-mix(in oklab, var(--positive) 18%, var(--paper)); color: var(--positive); }
+.badge--warning { background: color-mix(in oklab, var(--warning) 22%, var(--paper)); color: color-mix(in oklab, var(--warning) 70%, var(--ink)); }
+.badge--danger  { background: color-mix(in oklab, var(--danger) 18%, var(--paper)); color: var(--danger); }
+.badge__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-6);
+}
+.card__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  margin-bottom: var(--s-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card__title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-bottom: var(--s-2);
+}
+.card__body { color: var(--fg-muted); font-size: 14px; line-height: 1.6; }
+.card__footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: var(--s-5); padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  font-size: 13px; color: var(--fg-subtle);
+}
+
+/* ---------- Tables ---------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.table th, .table td {
+  padding: var(--s-3) var(--s-4);
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+}
+.table th {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  border-bottom: 1px solid var(--ink-3);
+}
+.table tr:hover td { background: var(--surface); }
+.table td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- Icon grid ---------- */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+.icon-cell {
+  background: var(--surface);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  color: var(--fg);
+}
+.icon-cell svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.icon-cell__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-subtle);
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Charts ---------- */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  padding: var(--s-5);
+}
+.chart-card__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  margin-bottom: var(--s-2);
+}
+.chart-card__value {
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--s-1);
+}
+.chart-card__delta { font-size: 12px; color: var(--positive); margin-bottom: var(--s-5); }
+.chart-card__delta.neg { color: var(--danger); }
+.chart-card svg { width: 100%; display: block; }
+
+/* ---------- Motion spec ---------- */
+.motion-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 120px;
+  gap: var(--s-5);
+  padding: var(--s-5) 0;
+  border-top: 1px solid var(--rule);
+  align-items: center;
+}
+.motion-row:last-child { border-bottom: 1px solid var(--rule); }
+.motion-track {
+  height: 32px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+.motion-dot {
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 24px; height: 24px;
+  background: var(--brand);
+  border-radius: var(--r-sm);
+  animation: slide 2.4s var(--ease) infinite;
+}
+.motion-row:nth-child(2) .motion-dot { animation-duration: 0.8s; }
+.motion-row:nth-child(3) .motion-dot { animation-duration: 1.4s; }
+.motion-row:nth-child(4) .motion-dot { animation-duration: 2.2s; }
+
+@keyframes slide {
+  0%   { left: 4px; }
+  45%  { left: calc(100% - 28px); }
+  55%  { left: calc(100% - 28px); }
+  100% { left: 4px; }
+}
+
+/* ---------- Applied dashboard ---------- */
+.app-frame {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: var(--shadow-2);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 620px;
+}
+.app-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--rule);
+  padding: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+.app-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.app-nav { display: flex; flex-direction: column; gap: 2px; }
+.app-nav a {
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.app-nav a:hover { background: var(--surface-2); color: var(--fg); }
+.app-nav a.active { background: var(--fg); color: var(--paper); }
+.app-nav a svg { width: 14px; height: 14px; stroke-width: 1.5; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+.app-nav__group-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  padding: var(--s-3) 10px var(--s-2);
+}
+
+.app-main { padding: var(--s-6); display: flex; flex-direction: column; gap: var(--s-6); overflow: hidden; }
+.app-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rule);
+}
+.app-topbar h1 { font-size: 32px; letter-spacing: -0.02em; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-4); }
+.kpi { padding: var(--s-4); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-md); }
+.kpi .mono { margin-bottom: var(--s-2); font-size: 10px; }
+.kpi__value { font-family: var(--font-display); font-size: 32px; line-height: 1; letter-spacing: -0.02em; }
+.kpi__delta { font-size: 12px; color: var(--positive); margin-top: var(--s-2); }
+.kpi__delta.neg { color: var(--danger); }
+
+/* ---------- Weave pattern (decorative) ---------- */
+.weave-bg {
+  background-image:
+    linear-gradient(90deg, color-mix(in oklab, var(--brand) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(0deg,  color-mix(in oklab, var(--brand) 10%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Tweaks panel ---------- */
+.tweaks-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 280px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: var(--r-md);
+  padding: var(--s-4);
+  box-shadow: var(--shadow-3);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  gap: var(--s-3);
+  font-family: var(--font-ui);
+}
+.tweaks-panel.open { display: flex; }
+.tweaks-panel h5 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tweaks-panel h5 button {
+  appearance: none; background: transparent; border: 0; color: var(--fg-subtle); cursor: pointer; font-size: 16px;
+}
+.tweak-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; color: var(--fg-muted); gap: var(--s-3);
+}
+.tweak-row label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-subtle); }
+.tweak-swatches { display: flex; gap: 6px; }
+.tweak-swatches button {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0;
+}
+.tweak-swatches button[aria-pressed="true"] { border-color: var(--fg); }
+
+/* ---------- Responsive fallbacks ---------- */
+@media (max-width: 900px) {
+  .section-head { grid-template-columns: 1fr; }
+  .palette-grid { grid-template-columns: repeat(3, 1fr); }
+  .tile-row { grid-template-columns: repeat(2, 1fr); }
+  .chart-grid { grid-template-columns: 1fr; }
+  .hero__title { font-size: 64px; }
+  .hero__meta { grid-template-columns: repeat(2, 1fr); }
+  .hero__weave { display: none; }
+  .app-frame { grid-template-columns: 1fr; }
+  .app-sidebar { display: none; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .icon-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="page-head">
+  <div class="page-head__inner">
+    <a href="#top" class="wordmark">
+      <svg class="wordmark__w" viewBox="0 0 22 22" aria-hidden="true">
+        <path d="M1 2 L5 20 L8 8 L11 20 L14 8 L17 20 L21 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      weave
+    </a>
+    <nav class="page-head__nav">
+      <a href="#foundations">Foundations</a>
+      <a href="#color">Color</a>
+      <a href="#type">Type</a>
+      <a href="#components">Components</a>
+      <a href="#charts">Charts</a>
+      <a href="#applied">Applied</a>
+    </nav>
+    <div class="palette-switch" role="group" aria-label="Palette">
+      <button data-palette-btn="loom" aria-pressed="true">Loom</button>
+      <button data-palette-btn="thread" aria-pressed="false">Thread</button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top" data-screen-label="01 Cover">
+  <div class="hero__label">
+    <span class="dot"></span>
+    <span class="mono">Weave — Personal brand &amp; design system</span>
+    <span class="mono" style="margin-left:auto">v 0.1 · April 2026</span>
+  </div>
+
+  <h1 class="hero__title">A system for <em>quietly</em> made web things.</h1>
+
+  <dl class="hero__meta">
+    <div>
+      <dt class="mono">Maker</dt>
+      <dd>Kenneth M.</dd>
+    </div>
+    <div>
+      <dt class="mono">Brand</dt>
+      <dd>Weave</dd>
+    </div>
+    <div>
+      <dt class="mono">First product</dt>
+      <dd>WeaveDrop</dd>
+    </div>
+    <div>
+      <dt class="mono">Built for</dt>
+      <dd>The public web</dd>
+    </div>
+  </dl>
+
+  <!-- Decorative woven warp/weft -->
+  <svg class="hero__weave" viewBox="0 0 360 360" aria-hidden="true">
+    <defs>
+      <pattern id="warp" x="0" y="0" width="18" height="18" patternUnits="userSpaceOnUse">
+        <path d="M0 9 H18" stroke="var(--brand)" stroke-width="0.8" opacity="0.55"/>
+        <path d="M9 0 V18" stroke="var(--ink)" stroke-width="0.5" opacity="0.22"/>
+      </pattern>
+    </defs>
+    <circle cx="180" cy="180" r="160" fill="url(#warp)"/>
+    <circle cx="180" cy="180" r="160" fill="none" stroke="var(--brand)" stroke-width="1"/>
+  </svg>
+</section>
+
+<hr class="rule" />
+
+<!-- ================= 01 FOUNDATIONS / CONCEPT ================= -->
+<section class="ds" id="foundations" data-screen-label="02 Concept">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 01 — Concept</div>
+    <div class="section-head__title">
+      <h2>The name is the system.</h2>
+      <p class="lede">
+        “Weave” names the craft and the object. Warp and weft, threads that cross — a quiet
+        metaphor for how software, like fabric, is made from many small repeated choices.
+      </p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--s-6)">
+    <div>
+      <div class="mono" style="margin-bottom:var(--s-3)">Principle 01</div>
+      <h3>Editorial, not loud.</h3>
+      <p style="margin-top:var(--s-3);color:var(--fg-muted);max-width:40ch">
+        Generous whitespace. Real serifs. The confidence to leave things unsaid.
+        Voice is quiet and considered, like a small press.
+      </p>
+    </div>
+    <div>
+      <div class="mono" style="margin-bottom:var(--s-3)">Principle 02</div>
+      <h3>Warm, not beige.</h3>
+      <p style="margin-top:var(--s-3);color:var(--fg-muted);max-width:40ch">
+        A cream paper ground, terracotta warmth, and oxblood for gravity.
+        Colors share chroma so the palette hangs together.
+      </p>
+    </div>
+    <div>
+      <div class="mono" style="margin-bottom:var(--s-3)">Principle 03</div>
+      <h3>Woven, not gradiented.</h3>
+      <p style="margin-top:var(--s-3);color:var(--fg-muted);max-width:40ch">
+        Structure shows. Grids, hairlines, tabular numbers. Texture comes from rhythm,
+        not gloss — no drop shadows where a rule will do.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 LOGO ================= -->
+<section class="ds" id="logo" data-screen-label="03 Logo">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 02 — Wordmark</div>
+    <div class="section-head__title">
+      <h2>Wordmark &amp; glyph.</h2>
+      <p class="lede">A lowercase wordmark paired with a glyph drawn as a single running stitch — one line, five peaks.</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:var(--s-5)">
+    <!-- Big wordmark -->
+    <div class="card" style="padding:var(--s-8);display:flex;align-items:center;justify-content:center;min-height:280px;background:var(--paper-2)">
+      <span style="font-family:var(--font-display);font-size:104px;line-height:1;letter-spacing:-0.04em;font-weight:300;display:inline-flex;align-items:baseline;gap:6px">
+        <svg viewBox="0 0 22 22" style="width:72px;height:72px;position:relative;top:10px">
+          <path d="M1 2 L5 20 L8 8 L11 20 L14 8 L17 20 L21 2" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        weave
+      </span>
+    </div>
+
+    <!-- Glyph only -->
+    <div class="card" style="padding:var(--s-8);display:flex;align-items:center;justify-content:center;min-height:280px;background:var(--brand);color:var(--paper)">
+      <svg viewBox="0 0 22 22" style="width:140px;height:140px">
+        <path d="M1 2 L5 20 L8 8 L11 20 L14 8 L17 20 L21 2" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Product lockup -->
+    <div class="card" style="padding:var(--s-6);display:flex;flex-direction:column;justify-content:space-between;min-height:280px">
+      <div class="mono">Product lockup</div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:40px;letter-spacing:-0.02em;line-height:1;display:flex;align-items:baseline;gap:4px">
+          <svg viewBox="0 0 22 22" style="width:28px;height:28px;position:relative;top:4px">
+            <path d="M1 2 L5 20 L8 8 L11 20 L14 8 L17 20 L21 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          weave<span style="color:var(--brand)">Drop</span>
+        </div>
+        <div class="mono" style="margin-top:var(--s-4);color:var(--fg-subtle)">Products use a capitalized suffix set in accent color.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s-5);margin-top:var(--s-5)">
+    <div class="card">
+      <div class="mono" style="margin-bottom:var(--s-3)">Clear space</div>
+      <p style="color:var(--fg-muted);font-size:14px;max-width:50ch">Reserve at minimum the x-height of the mark on every side. The glyph may stand alone at sizes under 24px where the wordmark becomes illegible.</p>
+    </div>
+    <div class="card">
+      <div class="mono" style="margin-bottom:var(--s-3)">Do not</div>
+      <p style="color:var(--fg-muted);font-size:14px;max-width:50ch">Do not stretch, re-color outside the palette, add effects, enclose in shapes, or pair with other display serifs. Never uppercase the wordmark.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 COLOR ================= -->
+<section class="ds" id="color" data-screen-label="04 Color">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 03 — Color</div>
+    <div class="section-head__title">
+      <h2>Warm, considered, oklch-defined.</h2>
+      <p class="lede">Two palettes — Loom (cream, daylight) and Thread (oxblood, dusk) — share the same accent hues at adjusted lightness.</p>
+    </div>
+  </div>
+
+  <div class="palette-row">
+    <div>
+      <h4>Paper &amp; ink</h4>
+      <div class="mono">Surfaces · text</div>
+    </div>
+    <div class="palette-grid">
+      <div class="swatch"><div class="swatch__chip" style="background:var(--paper)"></div><div class="swatch__name">Paper</div><div class="swatch__var">--paper</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--paper-2)"></div><div class="swatch__name">Paper 2</div><div class="swatch__var">--paper-2</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--paper-3)"></div><div class="swatch__name">Paper 3</div><div class="swatch__var">--paper-3</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--ink)"></div><div class="swatch__name" style="color:var(--fg)">Ink</div><div class="swatch__var">--ink</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--ink-2)"></div><div class="swatch__name">Ink 2</div><div class="swatch__var">--ink-2</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--ink-3)"></div><div class="swatch__name">Ink 3</div><div class="swatch__var">--ink-3</div></div>
+    </div>
+  </div>
+
+  <div class="palette-row">
+    <div>
+      <h4>Accents</h4>
+      <div class="mono">Brand · emphasis</div>
+    </div>
+    <div class="palette-grid" style="grid-template-columns:repeat(6,1fr)">
+      <div class="swatch"><div class="swatch__chip" style="background:var(--terracotta)"></div><div class="swatch__name">Terracotta</div><div class="swatch__var">--terracotta</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--madder)"></div><div class="swatch__name">Madder</div><div class="swatch__var">--madder</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--ochre)"></div><div class="swatch__name">Ochre</div><div class="swatch__var">--ochre</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--moss)"></div><div class="swatch__name">Moss</div><div class="swatch__var">--moss</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--rust)"></div><div class="swatch__name">Rust</div><div class="swatch__var">--rust</div></div>
+      <div class="swatch"><div class="swatch__chip" style="background:var(--brand-soft)"></div><div class="swatch__name">Brand soft</div><div class="swatch__var">--brand-soft</div></div>
+    </div>
+  </div>
+
+  <div class="palette-row">
+    <div>
+      <h4>Semantic</h4>
+      <div class="mono">Status · feedback</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-4)">
+      <div style="padding:var(--s-4);background:color-mix(in oklab,var(--positive) 14%,var(--paper));border-radius:var(--r-sm)">
+        <div class="mono" style="color:var(--positive)">Positive</div>
+        <div style="font-family:var(--font-display);font-size:18px;margin-top:4px">Synced · 2s ago</div>
+      </div>
+      <div style="padding:var(--s-4);background:color-mix(in oklab,var(--warning) 18%,var(--paper));border-radius:var(--r-sm)">
+        <div class="mono" style="color:color-mix(in oklab,var(--warning) 70%,var(--ink))">Warning</div>
+        <div style="font-family:var(--font-display);font-size:18px;margin-top:4px">Near quota</div>
+      </div>
+      <div style="padding:var(--s-4);background:color-mix(in oklab,var(--danger) 15%,var(--paper));border-radius:var(--r-sm)">
+        <div class="mono" style="color:var(--danger)">Danger</div>
+        <div style="font-family:var(--font-display);font-size:18px;margin-top:4px">Upload failed</div>
+      </div>
+      <div style="padding:var(--s-4);background:var(--brand-soft);border-radius:var(--r-sm)">
+        <div class="mono" style="color:var(--brand-deep)">Brand</div>
+        <div style="font-family:var(--font-display);font-size:18px;margin-top:4px;color:var(--brand-deep)">New feature</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 TYPE ================= -->
+<section class="ds" id="type" data-screen-label="05 Type">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 04 — Type</div>
+    <div class="section-head__title">
+      <h2>Newsreader, Plex Sans, Plex Mono.</h2>
+      <p class="lede">A warm optical-size serif for display and quotes; Plex Sans for interface; Plex Mono for labels, codes, and tabular figures.</p>
+    </div>
+  </div>
+
+  <div class="specimen-display" style="margin-bottom:var(--s-8)">
+    Woven <em>small</em>, stitched carefully, shipped often.
+  </div>
+
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Display / H1</span>
+      <div class="name">Newsreader 300 · 56px</div>
+    </div>
+    <div class="type-row__sample" style="font-family:var(--font-display);font-weight:300;font-size:56px;line-height:1.04;letter-spacing:-0.025em">Drop files, keep threads.</div>
+  </div>
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Heading / H2</span>
+      <div class="name">Newsreader 400 · 40px</div>
+    </div>
+    <div class="type-row__sample" style="font-family:var(--font-display);font-size:40px;line-height:1.08;letter-spacing:-0.02em">A quieter way to share.</div>
+  </div>
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Sub / H3</span>
+      <div class="name">Newsreader 400 · 28px</div>
+    </div>
+    <div class="type-row__sample" style="font-family:var(--font-display);font-size:28px;line-height:1.2;letter-spacing:-0.015em">Small tools, made carefully.</div>
+  </div>
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Body</span>
+      <div class="name">Plex Sans 400 · 16 / 25</div>
+    </div>
+    <div class="type-row__sample" style="font-size:16px;line-height:1.55;max-width:62ch;color:var(--fg-muted)">
+      WeaveDrop is a small, opinionated drop-box for the web: you share a link, the other side pulls the file. No accounts, no metadata trails, no ads. It is built to feel like handing someone a printed page.
+    </div>
+  </div>
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Small</span>
+      <div class="name">Plex Sans 400 · 14 / 22</div>
+    </div>
+    <div class="type-row__sample" style="font-size:14px;line-height:1.55;color:var(--fg-muted);max-width:62ch">
+      Secondary copy — form helpers, captions, footer notes. Reads comfortably at 14px on warm cream.
+    </div>
+  </div>
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Label</span>
+      <div class="name">Plex Mono 500 · 11px caps</div>
+    </div>
+    <div class="type-row__sample mono" style="font-size:11px">Section label · Tab label · Category</div>
+  </div>
+  <div class="type-row">
+    <div class="type-row__meta">
+      <span class="mono">Numeric</span>
+      <div class="name">Plex Mono tabular · 24px</div>
+    </div>
+    <div class="type-row__sample" style="font-family:var(--font-mono);font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em">
+      $ 1,284.00 · 86.3 MB · 00:00:42
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 SPACING / GRID ================= -->
+<section class="ds" id="spacing" data-screen-label="06 Spacing">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 05 — Space, grid, radius</div>
+    <div class="section-head__title">
+      <h2>A 4-pixel baseline.</h2>
+      <p class="lede">Spacing scales on a modular 4-pixel grid. Radius is restrained; corners are nearly square to keep things editorial.</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:var(--s-8);align-items:start">
+    <div>
+      <div class="mono" style="margin-bottom:var(--s-4)">Spacing scale</div>
+      <div id="space-scale"></div>
+    </div>
+
+    <div>
+      <div class="mono" style="margin-bottom:var(--s-4)">Radius</div>
+      <div class="tile-row">
+        <div class="tile"><div><div class="mono">2 px</div><div class="tile__name">xs</div></div><div class="tile__sample" style="border-radius:2px"></div></div>
+        <div class="tile"><div><div class="mono">4 px</div><div class="tile__name">sm</div></div><div class="tile__sample" style="border-radius:4px"></div></div>
+        <div class="tile"><div><div class="mono">6 px</div><div class="tile__name">md</div></div><div class="tile__sample" style="border-radius:6px"></div></div>
+        <div class="tile"><div><div class="mono">10 px</div><div class="tile__name">lg</div></div><div class="tile__sample" style="border-radius:10px"></div></div>
+        <div class="tile"><div><div class="mono">999</div><div class="tile__name">full</div></div><div class="tile__sample" style="border-radius:999px"></div></div>
+      </div>
+
+      <div class="mono" style="margin:var(--s-7) 0 var(--s-4)">Elevation (restrained)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-4)">
+        <div style="background:var(--paper);border:1px solid var(--rule);border-radius:var(--r-md);padding:var(--s-5);height:100px;box-shadow:var(--shadow-1)"><div class="mono">Shadow 1</div></div>
+        <div style="background:var(--paper);border:1px solid var(--rule);border-radius:var(--r-md);padding:var(--s-5);height:100px;box-shadow:var(--shadow-2)"><div class="mono">Shadow 2</div></div>
+        <div style="background:var(--paper);border:1px solid var(--rule);border-radius:var(--r-md);padding:var(--s-5);height:100px;box-shadow:var(--shadow-3)"><div class="mono">Shadow 3</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 06 COMPONENTS ================= -->
+<section class="ds" id="components" data-screen-label="07 Components">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 06 — Components</div>
+    <div class="section-head__title">
+      <h2>The working set.</h2>
+      <p class="lede">Buttons, inputs, cards, tables, badges — a small kit that covers 90% of screens.</p>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div style="margin-bottom:var(--s-8)">
+    <div class="mono" style="margin-bottom:var(--s-4)">Buttons</div>
+    <div style="display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center">
+      <button class="btn btn--brand">Create a drop</button>
+      <button class="btn">Copy link</button>
+      <button class="btn btn--outline">Cancel</button>
+      <button class="btn btn--ghost">Learn more →</button>
+      <button class="btn btn--sm btn--brand">Small</button>
+      <button class="btn btn--lg btn--brand">Large primary</button>
+    </div>
+  </div>
+
+  <!-- Inputs -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--s-5);margin-bottom:var(--s-8)">
+    <div class="input-group">
+      <label>Recipient email</label>
+      <input class="input" value="friend@example.com" />
+    </div>
+    <div class="input-group">
+      <label>Expires after</label>
+      <select class="input">
+        <option>24 hours</option>
+        <option>7 days</option>
+        <option>Never</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Note</label>
+      <textarea class="input input--ta">Here's the draft — printable master is page 2.</textarea>
+    </div>
+    <div style="display:flex;gap:var(--s-5);align-items:center">
+      <label class="check"><input type="checkbox" checked />Require passphrase</label>
+      <label class="check"><input type="checkbox" />Notify on view</label>
+    </div>
+    <div style="display:flex;gap:var(--s-3);align-items:center">
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      <span style="font-size:14px">End-to-end encryption</span>
+    </div>
+    <div style="display:flex;gap:var(--s-2);flex-wrap:wrap;align-items:center">
+      <span class="badge"><span class="badge__dot"></span>Draft</span>
+      <span class="badge badge--brand">New</span>
+      <span class="badge badge--positive"><span class="badge__dot"></span>Live</span>
+      <span class="badge badge--warning">Near quota</span>
+      <span class="badge badge--danger">Failed</span>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="mono" style="margin-bottom:var(--s-4)">Cards &amp; surfaces</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-5);margin-bottom:var(--s-8)">
+    <article class="card">
+      <div class="card__kicker"><span>Drop · 14 files</span><span>2d ago</span></div>
+      <h3 class="card__title">Catalog v3 — working proofs</h3>
+      <p class="card__body">Rough proofs from the printer. One round of notes, then we lock for press on Thursday.</p>
+      <div class="card__footer"><span>8.2 MB · 3 viewers</span><span>↗</span></div>
+    </article>
+    <article class="card" style="background:var(--fg);color:var(--paper);border-color:var(--fg)">
+      <div class="card__kicker" style="color:color-mix(in oklab,var(--paper) 60%,var(--fg))"><span>Featured</span><span>★</span></div>
+      <h3 class="card__title" style="color:var(--paper)">WeaveDrop 1.0 is here.</h3>
+      <p class="card__body" style="color:color-mix(in oklab,var(--paper) 75%,transparent)">A small, opinionated drop-box. Share a link, they pull the file. That's the whole app.</p>
+      <div class="card__footer" style="border-color:color-mix(in oklab,var(--paper) 20%,transparent);color:color-mix(in oklab,var(--paper) 60%,var(--fg))"><span>Read the notes</span><span>→</span></div>
+    </article>
+    <article class="card" style="border-style:dashed;background:transparent">
+      <div class="card__kicker"><span>Empty state</span></div>
+      <h3 class="card__title" style="color:var(--fg-muted)">No drops yet.</h3>
+      <p class="card__body">Start by dragging a file onto this page, or paste a link to share what you already have online.</p>
+      <div class="card__footer"><button class="btn btn--sm btn--brand">Create first drop</button></div>
+    </article>
+  </div>
+
+  <!-- Table -->
+  <div class="mono" style="margin-bottom:var(--s-4)">Tables</div>
+  <div style="border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;background:var(--paper)">
+    <table class="table">
+      <thead>
+        <tr><th>File</th><th>Shared with</th><th>Opened</th><th class="num" style="text-align:right">Size</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>catalog-v3-proofs.pdf</td><td>hannah@press.co</td><td class="num">3× · 2h ago</td><td class="num" style="text-align:right">8.24 MB</td><td><span class="badge badge--positive"><span class="badge__dot"></span>Live</span></td></tr>
+        <tr><td>site-hero-draft.png</td><td>me only</td><td class="num">—</td><td class="num" style="text-align:right">1.02 MB</td><td><span class="badge">Draft</span></td></tr>
+        <tr><td>notes-for-robin.md</td><td>robin@weave.run</td><td class="num">1× · 6d ago</td><td class="num" style="text-align:right">4 KB</td><td><span class="badge badge--warning">Expiring</span></td></tr>
+        <tr><td>contract-signed.pdf</td><td>legal@…</td><td class="num">0</td><td class="num" style="text-align:right">320 KB</td><td><span class="badge badge--danger">Failed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 07 ICONS ================= -->
+<section class="ds" id="icons" data-screen-label="08 Icons">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 07 — Iconography</div>
+    <div class="section-head__title">
+      <h2>1.5 px, rounded, drawn on a 24-pixel grid.</h2>
+      <p class="lede">Stroke-only line icons, optically balanced for a 22px display size. Never filled except for status dots and the wordmark glyph.</p>
+    </div>
+  </div>
+
+  <div class="icon-grid" id="icon-grid"></div>
+</section>
+
+<!-- ================= 08 CHARTS ================= -->
+<section class="ds" id="charts" data-screen-label="09 Charts">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 08 — Data viz</div>
+    <div class="section-head__title">
+      <h2>Charts in the palette.</h2>
+      <p class="lede">The chart ramp uses the same warm accents at matched chroma. Axes are hairlines; labels set in Plex Mono 10–11 px caps.</p>
+    </div>
+  </div>
+
+  <div class="chart-grid">
+    <!-- Area -->
+    <div class="chart-card">
+      <div class="chart-card__kicker">Drops this month</div>
+      <div class="chart-card__value">1,284</div>
+      <div class="chart-card__delta">▲ 12.4% vs last month</div>
+      <svg viewBox="0 0 320 120" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="var(--chart-1)" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="var(--chart-1)" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,90 C30,80 50,60 80,65 C110,70 130,40 160,30 C190,20 220,55 250,50 C280,45 300,25 320,20 L320,120 L0,120 Z" fill="url(#g1)"/>
+        <path d="M0,90 C30,80 50,60 80,65 C110,70 130,40 160,30 C190,20 220,55 250,50 C280,45 300,25 320,20" fill="none" stroke="var(--chart-1)" stroke-width="1.5"/>
+        <line x1="0" y1="119" x2="320" y2="119" stroke="var(--rule)" />
+      </svg>
+    </div>
+
+    <!-- Bars -->
+    <div class="chart-card">
+      <div class="chart-card__kicker">Open rate by day</div>
+      <div class="chart-card__value">68%</div>
+      <div class="chart-card__delta neg">▼ 2.1% vs last week</div>
+      <svg viewBox="0 0 320 120" preserveAspectRatio="none">
+        <g>
+          <rect x="10"  y="60" width="28" height="60" fill="var(--chart-2)"/>
+          <rect x="50"  y="40" width="28" height="80" fill="var(--chart-2)"/>
+          <rect x="90"  y="30" width="28" height="90" fill="var(--chart-1)"/>
+          <rect x="130" y="55" width="28" height="65" fill="var(--chart-2)"/>
+          <rect x="170" y="70" width="28" height="50" fill="var(--chart-2)"/>
+          <rect x="210" y="45" width="28" height="75" fill="var(--chart-2)"/>
+          <rect x="250" y="25" width="28" height="95" fill="var(--chart-1)"/>
+        </g>
+        <line x1="0" y1="119" x2="320" y2="119" stroke="var(--rule)" />
+      </svg>
+    </div>
+
+    <!-- Stacked donut -->
+    <div class="chart-card">
+      <div class="chart-card__kicker">Storage by type</div>
+      <div class="chart-card__value">42.1 GB</div>
+      <div class="chart-card__delta">8.1 GB remaining of 50</div>
+      <svg viewBox="0 0 320 120">
+        <g transform="translate(60,60)">
+          <circle r="46" fill="none" stroke="var(--rule-soft)" stroke-width="14"/>
+          <circle r="46" fill="none" stroke="var(--chart-1)" stroke-width="14"
+            stroke-dasharray="130 289" transform="rotate(-90)"/>
+          <circle r="46" fill="none" stroke="var(--chart-2)" stroke-width="14"
+            stroke-dasharray="70 289" stroke-dashoffset="-130" transform="rotate(-90)"/>
+          <circle r="46" fill="none" stroke="var(--chart-3)" stroke-width="14"
+            stroke-dasharray="50 289" stroke-dashoffset="-200" transform="rotate(-90)"/>
+        </g>
+        <g transform="translate(140,20)" font-family="var(--font-mono)" font-size="11" fill="var(--fg-muted)">
+          <g transform="translate(0,8)"><rect width="10" height="10" fill="var(--chart-1)"/><text x="16" y="9">PDF · 45%</text></g>
+          <g transform="translate(0,28)"><rect width="10" height="10" fill="var(--chart-2)"/><text x="16" y="9">IMG · 25%</text></g>
+          <g transform="translate(0,48)"><rect width="10" height="10" fill="var(--chart-3)"/><text x="16" y="9">VID · 18%</text></g>
+          <g transform="translate(0,68)"><rect width="10" height="10" fill="var(--rule-soft)"/><text x="16" y="9">free · 12%</text></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 09 MOTION ================= -->
+<section class="ds" id="motion" data-screen-label="10 Motion">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 09 — Motion</div>
+    <div class="section-head__title">
+      <h2>Short, eased, and honest.</h2>
+      <p class="lede">Motion confirms, never decorates. Three durations, one easing curve (<span class="mono" style="color:inherit;text-transform:none">cubic-bezier(0.2, 0.65, 0.25, 1)</span>).</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="motion-row">
+      <div><div class="mono">Quick</div><div style="font-family:var(--font-display);font-size:18px">140 ms</div></div>
+      <div class="motion-track"><div class="motion-dot"></div></div>
+      <div style="text-align:right"><span class="mono">hover · tap</span></div>
+    </div>
+    <div class="motion-row">
+      <div><div class="mono">Base</div><div style="font-family:var(--font-display);font-size:18px">240 ms</div></div>
+      <div class="motion-track"><div class="motion-dot"></div></div>
+      <div style="text-align:right"><span class="mono">panel · tab</span></div>
+    </div>
+    <div class="motion-row">
+      <div><div class="mono">Slow</div><div style="font-family:var(--font-display);font-size:18px">420 ms</div></div>
+      <div class="motion-track"><div class="motion-dot"></div></div>
+      <div style="text-align:right"><span class="mono">route · modal</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 10 APPLIED ================= -->
+<section class="ds" id="applied" data-screen-label="11 Applied — WeaveDrop">
+  <div class="section-head">
+    <div class="section-head__num mono">§ 10 — Applied</div>
+    <div class="section-head__title">
+      <h2>WeaveDrop dashboard, in the system.</h2>
+      <p class="lede">The system applied to the dashboard for your first product: everything above, in place.</p>
+    </div>
+  </div>
+
+  <div class="app-frame">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="app-sidebar__brand">
+        <svg viewBox="0 0 22 22" style="width:22px;height:22px;position:relative;top:3px;color:var(--brand)"><path d="M1 2 L5 20 L8 8 L11 20 L14 8 L17 20 L21 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        weave<span style="color:var(--brand)">Drop</span>
+      </div>
+
+      <div>
+        <nav class="app-nav">
+          <a class="active"><svg viewBox="0 0 24 24"><path d="M3 12 L12 3 L21 12"/><path d="M5 10 V21 H19 V10"/></svg>Drops</a>
+          <a><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10 H21"/></svg>Inbox</a>
+          <a><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12 H21"/><path d="M12 3 C15 7 15 17 12 21"/><path d="M12 3 C9 7 9 17 12 21"/></svg>Public links</a>
+          <a><svg viewBox="0 0 24 24"><path d="M3 7 H21"/><path d="M3 12 H21"/><path d="M3 17 H14"/></svg>Activity</a>
+        </nav>
+
+        <div class="app-nav__group-label">Account</div>
+        <nav class="app-nav">
+          <a><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16 8 14 12 14 C16 14 20 16 20 21"/></svg>Profile</a>
+          <a><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12 C19 12.7 18.9 13.4 18.7 14 L20.4 15.3 L18.9 17.9 L16.8 17.2 C16 17.8 15 18.2 14 18.5 L13.6 20.6 H10.4 L10 18.5 C9 18.2 8 17.8 7.2 17.2 L5.1 17.9 L3.6 15.3 L5.3 14 C5.1 13.4 5 12.7 5 12 C5 11.3 5.1 10.6 5.3 10 L3.6 8.7 L5.1 6.1 L7.2 6.8 C8 6.2 9 5.8 10 5.5 L10.4 3.4 H13.6 L14 5.5 C15 5.8 16 6.2 16.8 6.8 L18.9 6.1 L20.4 8.7 L18.7 10 C18.9 10.6 19 11.3 19 12 Z"/></svg>Settings</a>
+          <a><svg viewBox="0 0 24 24"><path d="M15 3 H5 V21 H19 V7 Z"/><path d="M15 3 V7 H19"/></svg>Billing</a>
+        </nav>
+      </div>
+
+      <div style="margin-top:auto;padding:var(--s-3);background:var(--paper-3);border-radius:var(--r-sm);font-size:12px;color:var(--fg-muted)">
+        <div class="mono" style="margin-bottom:4px">Storage</div>
+        <div style="height:4px;background:var(--rule);border-radius:2px;overflow:hidden;margin-bottom:6px">
+          <div style="height:100%;width:84%;background:var(--brand)"></div>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:11px">42.1 of 50 GB</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="app-main">
+      <div class="app-topbar">
+        <div>
+          <div class="mono" style="margin-bottom:6px">Overview · April 17</div>
+          <h1 style="font-family:var(--font-display);font-weight:300">Good afternoon, Kenneth.</h1>
+        </div>
+        <div style="display:flex;gap:var(--s-3)">
+          <button class="btn btn--outline btn--sm">Invite</button>
+          <button class="btn btn--brand btn--sm">+ New drop</button>
+        </div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="mono">Active drops</div>
+          <div class="kpi__value">28</div>
+          <div class="kpi__delta">▲ 4 this week</div>
+        </div>
+        <div class="kpi">
+          <div class="mono">Views · 7 d</div>
+          <div class="kpi__value">1,284</div>
+          <div class="kpi__delta">▲ 12.4%</div>
+        </div>
+        <div class="kpi">
+          <div class="mono">Avg time on link</div>
+          <div class="kpi__value">42<span style="font-size:18px;color:var(--fg-subtle)"> s</span></div>
+          <div class="kpi__delta neg">▼ 3 s</div>
+        </div>
+        <div class="kpi">
+          <div class="mono">Storage</div>
+          <div class="kpi__value">42.1<span style="font-size:18px;color:var(--fg-subtle)"> GB</span></div>
+          <div class="kpi__delta">8 GB left</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:var(--s-5)">
+        <!-- Chart -->
+        <div class="chart-card" style="padding:var(--s-5)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--s-4)">
+            <div>
+              <div class="chart-card__kicker">Views over time</div>
+              <div class="chart-card__value">1,284</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn--ghost btn--sm">7 d</button>
+              <button class="btn btn--sm" style="--btn-bg:var(--surface-2);--btn-fg:var(--fg);--btn-border:var(--rule)">30 d</button>
+              <button class="btn btn--ghost btn--sm">All</button>
+            </div>
+          </div>
+          <svg viewBox="0 0 480 160" preserveAspectRatio="none" style="height:160px">
+            <defs>
+              <linearGradient id="ag1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="var(--chart-1)" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="var(--chart-1)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g stroke="var(--rule-soft)" stroke-dasharray="2 4">
+              <line x1="0" y1="40"  x2="480" y2="40"/>
+              <line x1="0" y1="80"  x2="480" y2="80"/>
+              <line x1="0" y1="120" x2="480" y2="120"/>
+            </g>
+            <path d="M0,120 C40,110 80,90 120,95 C160,100 200,60 240,45 C280,30 320,75 360,70 C400,65 440,35 480,25 L480,160 L0,160 Z" fill="url(#ag1)"/>
+            <path d="M0,120 C40,110 80,90 120,95 C160,100 200,60 240,45 C280,30 320,75 360,70 C400,65 440,35 480,25" fill="none" stroke="var(--chart-1)" stroke-width="1.5"/>
+            <circle cx="240" cy="45" r="3" fill="var(--paper)" stroke="var(--chart-1)" stroke-width="1.5"/>
+          </svg>
+        </div>
+
+        <!-- Recent activity -->
+        <div class="chart-card" style="padding:0;overflow:hidden">
+          <div style="padding:var(--s-5) var(--s-5) var(--s-3);display:flex;justify-content:space-between;align-items:baseline">
+            <div class="chart-card__kicker" style="margin:0">Recent activity</div>
+            <a class="mono" style="color:var(--fg-subtle);cursor:pointer">View all →</a>
+          </div>
+          <div>
+            <div style="display:flex;gap:var(--s-3);padding:var(--s-3) var(--s-5);border-top:1px solid var(--rule);align-items:center">
+              <div style="width:8px;height:8px;background:var(--positive);border-radius:50%;flex-shrink:0"></div>
+              <div style="flex:1;font-size:13px"><strong style="font-weight:500">hannah@press.co</strong> opened Catalog v3 proofs</div>
+              <div class="mono" style="font-size:10px">2h</div>
+            </div>
+            <div style="display:flex;gap:var(--s-3);padding:var(--s-3) var(--s-5);border-top:1px solid var(--rule);align-items:center">
+              <div style="width:8px;height:8px;background:var(--brand);border-radius:50%;flex-shrink:0"></div>
+              <div style="flex:1;font-size:13px">New drop: <strong style="font-weight:500">site-hero-draft.png</strong></div>
+              <div class="mono" style="font-size:10px">5h</div>
+            </div>
+            <div style="display:flex;gap:var(--s-3);padding:var(--s-3) var(--s-5);border-top:1px solid var(--rule);align-items:center">
+              <div style="width:8px;height:8px;background:var(--warning);border-radius:50%;flex-shrink:0"></div>
+              <div style="flex:1;font-size:13px"><strong style="font-weight:500">notes-for-robin.md</strong> expires in 12 h</div>
+              <div class="mono" style="font-size:10px">yest</div>
+            </div>
+            <div style="display:flex;gap:var(--s-3);padding:var(--s-3) var(--s-5);border-top:1px solid var(--rule);align-items:center">
+              <div style="width:8px;height:8px;background:var(--danger);border-radius:50%;flex-shrink:0"></div>
+              <div style="flex:1;font-size:13px">Upload of <strong style="font-weight:500">contract-signed.pdf</strong> failed</div>
+              <div class="mono" style="font-size:10px">2d</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;background:var(--paper)">
+        <div style="padding:var(--s-4) var(--s-5);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--rule)">
+          <div class="mono">All drops · 4 of 28</div>
+          <div style="display:flex;gap:var(--s-3);align-items:center">
+            <input class="input" style="height:32px;font-size:13px;width:220px" placeholder="Search drops…" />
+            <button class="btn btn--outline btn--sm">Filter</button>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>File</th><th>Shared with</th><th>Opened</th><th class="num" style="text-align:right">Size</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>catalog-v3-proofs.pdf</td><td>hannah@press.co</td><td class="num">3× · 2h ago</td><td class="num" style="text-align:right">8.24 MB</td><td><span class="badge badge--positive"><span class="badge__dot"></span>Live</span></td></tr>
+            <tr><td>site-hero-draft.png</td><td>me only</td><td class="num">—</td><td class="num" style="text-align:right">1.02 MB</td><td><span class="badge">Draft</span></td></tr>
+            <tr><td>notes-for-robin.md</td><td>robin@weave.run</td><td class="num">1× · 6d ago</td><td class="num" style="text-align:right">4 KB</td><td><span class="badge badge--warning">Expiring</span></td></tr>
+            <tr><td>contract-signed.pdf</td><td>legal@…</td><td class="num">0</td><td class="num" style="text-align:right">320 KB</td><td><span class="badge badge--danger">Failed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<section class="ds" style="padding-top:var(--s-9);padding-bottom:var(--s-9)">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s-8);align-items:end">
+    <div>
+      <div class="mono" style="margin-bottom:var(--s-3)">End of document</div>
+      <h2 style="font-size:48px;max-width:22ch">One more stitch — then we ship.</h2>
+    </div>
+    <div style="font-size:13px;color:var(--fg-muted);text-align:right">
+      Weave · Design system v 0.1<br>
+      Maintained by Kenneth · April 2026<br>
+      <span class="mono" style="display:inline-block;margin-top:8px">weave.run</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================= TWEAKS PANEL ================= -->
+<div class="tweaks-panel" id="tweaks-panel">
+  <h5>Tweaks <button id="tweaks-close" aria-label="Close">×</button></h5>
+  <div class="tweak-row">
+    <label>Palette</label>
+    <div class="palette-switch" style="padding:2px">
+      <button data-palette-btn="loom" aria-pressed="true">Loom</button>
+      <button data-palette-btn="thread" aria-pressed="false">Thread</button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <label>Accent</label>
+    <div class="tweak-swatches" id="accent-swatches">
+      <button data-accent="terracotta" aria-pressed="true" style="background:oklch(0.58 0.135 42)"></button>
+      <button data-accent="madder"    aria-pressed="false" style="background:oklch(0.46 0.135 28)"></button>
+      <button data-accent="ochre"     aria-pressed="false" style="background:oklch(0.72 0.125 80)"></button>
+      <button data-accent="moss"      aria-pressed="false" style="background:oklch(0.52 0.065 125)"></button>
+      <button data-accent="indigo"    aria-pressed="false" style="background:oklch(0.48 0.12 265)"></button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <label>Density</label>
+    <select class="input" style="height:30px;font-size:12px;width:auto" id="density-select">
+      <option value="comfortable" selected>Comfortable</option>
+      <option value="compact">Compact</option>
+      <option value="spacious">Spacious</option>
+    </select>
+  </div>
+  <div class="tweak-row">
+    <label>Display font</label>
+    <select class="input" style="height:30px;font-size:12px;width:auto" id="font-select">
+      <option value="Newsreader" selected>Newsreader</option>
+      <option value="Source Serif 4">Source Serif 4</option>
+      <option value="DM Serif Display">DM Serif Display</option>
+    </select>
+  </div>
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "palette": "thread",
+  "accent": "indigo",
+  "density": "compact",
+  "displayFont": "Newsreader"
+}/*EDITMODE-END*/;
+
+/* ---------- Spacing scale renderer ---------- */
+(function renderScale() {
+  const el = document.getElementById('space-scale');
+  if (!el) return;
+  const scale = [
+    { name: 's-1', px: 4 }, { name: 's-2', px: 8 }, { name: 's-3', px: 12 },
+    { name: 's-4', px: 16 }, { name: 's-5', px: 24 }, { name: 's-6', px: 32 },
+    { name: 's-7', px: 48 }, { name: 's-8', px: 64 }, { name: 's-9', px: 96 },
+  ];
+  el.innerHTML = scale.map(s => `
+    <div class="space-row">
+      <div class="token">${s.name}</div>
+      <div class="space-bar" style="width:${(s.px/96)*100}%;max-width:100%"></div>
+      <div class="mono" style="text-align:right">${s.px} px</div>
+    </div>
+  `).join('');
+})();
+
+/* ---------- Icon grid ---------- */
+(function renderIcons() {
+  const el = document.getElementById('icon-grid');
+  if (!el) return;
+  const icons = [
+    ['drop',     '<path d="M12 3 L19 13 C19 18 15.5 21 12 21 C8.5 21 5 18 5 13 Z"/>'],
+    ['share',    '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 11 L16 7"/><path d="M8 13 L16 17"/>'],
+    ['link',     '<path d="M10 14 L14 10"/><path d="M8 16 L6 18 C4 20 1 17 3 15 L7 11"/><path d="M16 8 L18 6 C20 4 23 7 21 9 L17 13"/>'],
+    ['lock',     '<rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11 V8 A4 4 0 0 1 16 8 V11"/>'],
+    ['mail',     '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 7 L12 13 L21 7"/>'],
+    ['clock',    '<circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15 14"/>'],
+    ['eye',      '<path d="M2 12 C5 7 8 5 12 5 C16 5 19 7 22 12 C19 17 16 19 12 19 C8 19 5 17 2 12 Z"/><circle cx="12" cy="12" r="3"/>'],
+    ['folder',   '<path d="M3 6 A1 1 0 0 1 4 5 H9 L11 7 H20 A1 1 0 0 1 21 8 V18 A1 1 0 0 1 20 19 H4 A1 1 0 0 1 3 18 Z"/>'],
+    ['upload',   '<path d="M12 16 V4"/><path d="M7 9 L12 4 L17 9"/><path d="M4 20 H20"/>'],
+    ['download', '<path d="M12 4 V16"/><path d="M7 11 L12 16 L17 11"/><path d="M4 20 H20"/>'],
+    ['search',   '<circle cx="11" cy="11" r="6"/><path d="M16 16 L21 21"/>'],
+    ['trash',    '<path d="M4 7 H20"/><path d="M9 7 V4 H15 V7"/><path d="M6 7 L7 21 H17 L18 7"/>'],
+    ['plus',     '<path d="M12 5 V19"/><path d="M5 12 H19"/>'],
+    ['check',    '<path d="M5 12 L10 17 L20 7"/>'],
+    ['x',        '<path d="M6 6 L18 18"/><path d="M18 6 L6 18"/>'],
+    ['arrow',    '<path d="M5 12 H19"/><path d="M13 6 L19 12 L13 18"/>'],
+    ['info',     '<circle cx="12" cy="12" r="9"/><path d="M12 11 V17"/><circle cx="12" cy="8" r="0.6" fill="currentColor"/>'],
+    ['star',     '<path d="M12 3 L14.5 9 L21 10 L16 14.5 L17.5 21 L12 17.5 L6.5 21 L8 14.5 L3 10 L9.5 9 Z"/>'],
+    ['tag',      '<path d="M3 12 V3 H12 L21 12 L12 21 Z"/><circle cx="8" cy="8" r="1"/>'],
+    ['user',     '<circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16 8 14 12 14 C16 14 20 16 20 21"/>'],
+    ['users',    '<circle cx="9" cy="9" r="3.5"/><path d="M3 19 C3 15 6 13 9 13 C12 13 15 15 15 19"/><circle cx="17" cy="8" r="3"/><path d="M21 18 C21 15 19 13 17 13"/>'],
+    ['sun',      '<circle cx="12" cy="12" r="4"/><path d="M12 2 V4"/><path d="M12 20 V22"/><path d="M2 12 H4"/><path d="M20 12 H22"/><path d="M5 5 L6.5 6.5"/><path d="M17.5 17.5 L19 19"/><path d="M5 19 L6.5 17.5"/><path d="M17.5 6.5 L19 5"/>'],
+    ['moon',     '<path d="M20 14 A8 8 0 1 1 10 4 A6 6 0 0 0 20 14 Z"/>'],
+    ['thread',   '<path d="M3 4 L7 20 L10 8 L13 20 L16 8 L19 20 L21 4" stroke-linecap="round" stroke-linejoin="round"/>'],
+  ];
+  el.innerHTML = icons.map(([name, svg]) => `
+    <div class="icon-cell">
+      <svg viewBox="0 0 24 24">${svg}</svg>
+      <div class="icon-cell__label">${name}</div>
+    </div>
+  `).join('');
+})();
+
+/* ---------- Palette switcher ---------- */
+(function paletteSwitcher() {
+  const buttons = document.querySelectorAll('[data-palette-btn]');
+  function setPalette(p) {
+    document.documentElement.setAttribute('data-palette', p);
+    buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.paletteBtn === p ? 'true' : 'false'));
+    try { localStorage.setItem('weave.palette', p); } catch(e) {}
+    postTweak({ palette: p });
+  }
+  buttons.forEach(b => b.addEventListener('click', () => setPalette(b.dataset.paletteBtn)));
+
+  // Init
+  let initial = TWEAK_DEFAULTS.palette;
+  try { initial = localStorage.getItem('weave.palette') || initial; } catch(e) {}
+  setPalette(initial);
+})();
+
+/* ---------- Accent swatches ---------- */
+const accents = {
+  terracotta: { h: 42,  c: 0.135, l_light: 0.58, l_deep: 0.46, l_dark: 0.70 },
+  madder:     { h: 28,  c: 0.135, l_light: 0.50, l_deep: 0.40, l_dark: 0.66 },
+  ochre:      { h: 80,  c: 0.125, l_light: 0.66, l_deep: 0.52, l_dark: 0.80 },
+  moss:       { h: 125, c: 0.075, l_light: 0.52, l_deep: 0.40, l_dark: 0.70 },
+  indigo:     { h: 265, c: 0.120, l_light: 0.48, l_deep: 0.38, l_dark: 0.72 },
+};
+function applyAccent(name) {
+  const a = accents[name]; if (!a) return;
+  const dark = document.documentElement.getAttribute('data-palette') === 'thread';
+  const root = document.documentElement.style;
+  root.setProperty('--brand',      `oklch(${dark ? a.l_dark : a.l_light} ${a.c} ${a.h})`);
+  root.setProperty('--brand-deep', `oklch(${a.l_deep} ${a.c} ${a.h})`);
+  root.setProperty('--brand-soft', `oklch(${dark ? 0.34 : 0.88} ${Math.min(a.c, 0.06)} ${a.h})`);
+  root.setProperty('--chart-1',    `oklch(${dark ? a.l_dark : a.l_light} ${a.c} ${a.h})`);
+  document.querySelectorAll('#accent-swatches button').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.accent === name ? 'true' : 'false'));
+  postTweak({ accent: name });
+}
+document.querySelectorAll('#accent-swatches button').forEach(b =>
+  b.addEventListener('click', () => applyAccent(b.dataset.accent)));
+
+/* ---------- Density ---------- */
+function applyDensity(d) {
+  const root = document.documentElement.style;
+  if (d === 'compact')       { root.setProperty('--s-5','18px'); root.setProperty('--s-6','24px'); root.setProperty('--s-7','36px'); root.setProperty('--s-8','48px'); root.setProperty('--s-9','72px'); root.setProperty('--s-10','96px'); }
+  else if (d === 'spacious') { root.setProperty('--s-5','28px'); root.setProperty('--s-6','40px'); root.setProperty('--s-7','60px'); root.setProperty('--s-8','80px'); root.setProperty('--s-9','120px'); root.setProperty('--s-10','160px'); }
+  else                       { root.setProperty('--s-5','24px'); root.setProperty('--s-6','32px'); root.setProperty('--s-7','48px'); root.setProperty('--s-8','64px'); root.setProperty('--s-9','96px'); root.setProperty('--s-10','128px'); }
+  postTweak({ density: d });
+}
+document.getElementById('density-select').addEventListener('change', e => applyDensity(e.target.value));
+
+/* ---------- Font swap ---------- */
+function applyFont(name) {
+  // Lazy-load additional serif families
+  const id = 'tweak-font-' + name.replace(/\s+/g,'-');
+  if (!document.getElementById(id) && name !== 'Newsreader') {
+    const l = document.createElement('link');
+    l.id = id; l.rel = 'stylesheet';
+    l.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:ital,wght@0,300;0,400;1,400&display=swap`;
+    document.head.appendChild(l);
+  }
+  document.documentElement.style.setProperty('--font-display', `"${name}", Georgia, serif`);
+  postTweak({ displayFont: name });
+}
+document.getElementById('font-select').addEventListener('change', e => applyFont(e.target.value));
+
+/* ---------- Tweaks edit mode wiring ---------- */
+const panel = document.getElementById('tweaks-panel');
+window.addEventListener('message', e => {
+  if (!e.data || typeof e.data !== 'object') return;
+  if (e.data.type === '__activate_edit_mode')   panel.classList.add('open');
+  if (e.data.type === '__deactivate_edit_mode') panel.classList.remove('open');
+});
+document.getElementById('tweaks-close').addEventListener('click', () => panel.classList.remove('open'));
+function postTweak(edits) {
+  try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*'); } catch(e) {}
+}
+try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(e) {}
+
+/* ---------- Apply initial tweaks ---------- */
+applyAccent(TWEAK_DEFAULTS.accent);
+applyDensity(TWEAK_DEFAULTS.density);
+if (TWEAK_DEFAULTS.displayFont !== 'Newsreader') applyFont(TWEAK_DEFAULTS.displayFont);
+</script>
+
+</body>
+</html>

@@ -12,14 +12,24 @@ import type { INode, NodeType, SourceStatus } from "@/types/db";
 import type { NodeDTO } from "./dto";
 import { requireUserAndDb } from "./_helpers";
 
-function toNodeDTO(doc: INode): NodeDTO {
+function toNodeDTO(
+  doc: INode,
+  options?: {
+    latestChatMessage?: { role: "user" | "assistant" | "system"; content: string } | null;
+  },
+): NodeDTO {
+  const latestChatMessage = options?.latestChatMessage ?? null;
+
   return {
     id: String(doc._id),
     brainId: String(doc.brainId),
     type: doc.type,
     position: { x: doc.position?.x ?? 0, y: doc.position?.y ?? 0 },
     size: doc.size ? { width: doc.size.width, height: doc.size.height } : null,
-    data: doc.data ?? {},
+    data: {
+      ...(doc.data ?? {}),
+      ...(latestChatMessage ? { latestMessagePreview: latestChatMessage } : {}),
+    },
     status: (doc.status as SourceStatus | undefined) ?? null,
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
@@ -35,7 +45,49 @@ export async function listNodesForBrain(
     .sort({ createdAt: 1 })
     .lean<INode[]>();
 
-  return docs.map(toNodeDTO);
+  const chatNodeIds = docs
+    .filter((doc) => doc.type === "chat")
+    .map((doc) => doc._id);
+
+  const latestMessages =
+    chatNodeIds.length > 0
+      ? await ChatMessage.aggregate<{
+          _id: import("mongoose").Types.ObjectId;
+          role: "user" | "assistant" | "system";
+          content: string;
+        }>([
+          {
+            $match: {
+              ownerClerkId: userId,
+              chatNodeId: { $in: chatNodeIds },
+            },
+          },
+          { $sort: { createdAt: -1, _id: -1 } },
+          {
+            $group: {
+              _id: "$chatNodeId",
+              role: { $first: "$role" },
+              content: { $first: "$content" },
+            },
+          },
+        ])
+      : [];
+
+  const latestMessageByChatId = new Map(
+    latestMessages.map((message) => [
+      String(message._id),
+      { role: message.role, content: message.content },
+    ]),
+  );
+
+  return docs.map((doc) =>
+    toNodeDTO(doc, {
+      latestChatMessage:
+        doc.type === "chat"
+          ? latestMessageByChatId.get(String(doc._id)) ?? null
+          : null,
+    }),
+  );
 }
 
 export type CreateNodeInput = {
