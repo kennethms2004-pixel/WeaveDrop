@@ -234,3 +234,15 @@ body {
     outline-offset: 2px;
   }
 }
+
+/*
+ * Clerk: "Continue with …" block buttons sometimes inherit tokens that resolve
+ * to near-white labels on light surfaces. Pin readable label color.
+ */
+[class*="cl-socialButtonsBlockButton"] {
+  color: var(--foreground);
+}
+
+[class*="cl-socialButtonsBlockButton"] span {
+  color: inherit;
+}
