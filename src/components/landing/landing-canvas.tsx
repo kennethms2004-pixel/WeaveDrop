@@ -5,15 +5,15 @@ type CanvasCardProps = {
   kicker: string;
   title: string;
   body: string;
-  tint?: "brand" | "ochre";
+  tint?: "brand" | "muted";
 };
 
 function CanvasCard({ style, kicker, title, body, tint }: CanvasCardProps) {
   const borderColor =
     tint === "brand"
       ? "var(--brand)"
-      : tint === "ochre"
-        ? "var(--ochre)"
+      : tint === "muted"
+        ? "color-mix(in oklch, var(--brand) 38%, var(--rule))"
         : "var(--rule)";
   return (
     <div
@@ -54,7 +54,7 @@ export function LandingCanvas({ wide = false }: { wide?: boolean }) {
           />
           <span
             className="h-2 w-2 rounded-full"
-            style={{ background: "var(--ochre)" }}
+            style={{ background: "color-mix(in oklch, var(--brand) 55%, var(--rule))" }}
           />
           <span
             className="h-2 w-2 rounded-full"
@@ -108,7 +108,7 @@ export function LandingCanvas({ wide = false }: { wide?: boolean }) {
             kicker="Source"
             title="Park et al. — generative agents"
             body="open in tab · arxiv 2304.03442"
-            tint="ochre"
+            tint="muted"
           />
           <CanvasCard
             style={{ left: "58%", top: "66%", width: "36%" }}
